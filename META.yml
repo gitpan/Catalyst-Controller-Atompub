@@ -1,0 +1,43 @@
+---
+name: Catalyst-Controller-Atompub
+version: 0.0.1
+author:
+  - 'Takeru INOUE <takeru.inoue _ gmail.com>'
+abstract: A Catalyst controller for the Atom Publishing Protocol
+license: perl
+resources:
+  license: http://dev.perl.org/licenses/
+requires:
+  Atompub: 0.1.0
+  Catalyst::Runtime: 5.7
+  File::Slurp: 0
+  FindBin: 0
+  HTTP::Status: 0
+  MIME::Base64: 0
+  POSIX: 0
+  Test::More: 0
+  Test::Perl::Critic: 0
+  Test::WWW::Mechanize::Catalyst: 0
+  Time::HiRes: 0
+  URI::Escape: 0
+  XML::Atom: 0.25
+  XML::Atom::Service: 0.15.0
+  version: 0
+provides:
+  Catalyst::Controller::Atompub:
+    file: lib/Catalyst/Controller/Atompub.pm
+    version: 0.0.1
+  Catalyst::Controller::Atompub::Base:
+    file: lib/Catalyst/Controller/Atompub/Base.pm
+  Catalyst::Controller::Atompub::Collection:
+    file: lib/Catalyst/Controller/Atompub/Collection.pm
+  Catalyst::Controller::Atompub::Collection::Resource:
+    file: lib/Catalyst/Controller/Atompub/Collection.pm
+  Catalyst::Controller::Atompub::Info:
+    file: lib/Catalyst/Controller/Atompub/Base.pm
+  Catalyst::Controller::Atompub::Service:
+    file: lib/Catalyst/Controller/Atompub/Service.pm
+generated_by: Module::Build version 0.2808
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2

@@ -1,0 +1,9 @@
+---
+name: MyApp
+
+Model::DBIC:
+    schema_class: MyApp::Model::Schema
+    connect_info:
+        - dbi:mysql:test
+        - test
+        - test
