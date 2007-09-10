@@ -1,7 +1,7 @@
 use inc::Module::Install;
 
-name 'MyApp';
-all_from 'lib/MyApp.pm';
+name 'MyAtom';
+all_from 'lib/MyAtom.pm';
 
 requires 'Catalyst' => '5.7010';
 requires 'Catalyst::Plugin::ConfigLoader';

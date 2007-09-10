@@ -6,15 +6,15 @@ use strict;
 use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
-use MyApp;
+use MyAtom;
 
-MyApp->run;
+MyAtom->run;
 
 1;
 
 =head1 NAME
 
-myapp_cgi.pl - Catalyst CGI
+myatom_cgi.pl - Catalyst CGI
 
 =head1 SYNOPSIS
 

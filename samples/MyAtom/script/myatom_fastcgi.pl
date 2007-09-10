@@ -8,7 +8,7 @@ use Getopt::Long;
 use Pod::Usage;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
-use MyApp;
+use MyAtom;
 
 my $help = 0;
 my ( $listen, $nproc, $pidfile, $manager, $detach, $keep_stderr );
@@ -25,7 +25,7 @@ GetOptions(
 
 pod2usage(1) if $help;
 
-MyApp->run( 
+MyAtom->run( 
     $listen, 
     {   nproc   => $nproc,
         pidfile => $pidfile, 
@@ -39,11 +39,11 @@ MyApp->run(
 
 =head1 NAME
 
-myapp_fastcgi.pl - Catalyst FastCGI
+myatom_fastcgi.pl - Catalyst FastCGI
 
 =head1 SYNOPSIS
 
-myapp_fastcgi.pl [options]
+myatom_fastcgi.pl [options]
  
  Options:
    -? -help      display this help and exits

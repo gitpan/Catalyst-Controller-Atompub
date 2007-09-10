@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use Carp;
 
-use version; our $VERSION = qv('0.0.1');
+use version; our $VERSION = qv('0.0.2');
 
 use Atompub 0.1.0;
 use Catalyst::Request;
@@ -64,7 +64,7 @@ Publishes and edits resources in the collection.
 
 =back
 
-At first, install sample C<samples/MyApp> in L<SAMPLES> and read controller classes.
+At first, install sample C<samples/MyAtom> in L<SAMPLES> and read controller classes.
 The code is explained in
 L<Catalyst::Controller::Atompub::Service> and 
 L<Catalyst::Controller::Atompub::Collection>.
@@ -102,7 +102,7 @@ username is 'test', and password is 'test'.
 =back
 
 
-=head2 samples/MyApp
+=head2 samples/MyAtom
 
 This sample is minimum implementation of the Atom Publishing Protocol.
 It has a single collection containing Entry Resources.
@@ -130,6 +130,8 @@ This sample also provides a HTML view at http://localhost:3000/html .
 =head1 AUTHOR
 
 Takeru INOUE  C<< <takeru.inoue _ gmail.com> >>
+
+I would like to thank Masaki NAKAGAWA for his valuable suggestions.
 
 
 =head1 LICENCE AND COPYRIGHT

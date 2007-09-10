@@ -50,9 +50,9 @@ if ( $debug ) {
 
 # This is require instead of use so that the above environment
 # variables can be set at runtime.
-require MyApp;
+require MyAtom;
 
-MyApp->run( $port, $host, {
+MyAtom->run( $port, $host, {
     argv              => \@argv,
     'fork'            => $fork,
     keepalive         => $keepalive,
@@ -66,11 +66,11 @@ MyApp->run( $port, $host, {
 
 =head1 NAME
 
-myapp_server.pl - Catalyst Testserver
+myatom_server.pl - Catalyst Testserver
 
 =head1 SYNOPSIS
 
-myapp_server.pl [options]
+myatom_server.pl [options]
 
  Options:
    -d -debug          force debug mode

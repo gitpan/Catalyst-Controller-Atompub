@@ -1,4 +1,4 @@
-package MyApp;
+package MyAtom;
 
 use strict;
 use warnings;
@@ -19,14 +19,14 @@ our $VERSION = '0.01';
 
 # Configure the application. 
 #
-# Note that settings in MyApp.yml (or other external
+# Note that settings in MyAtom.yml (or other external
 # configuration file that you set up manually) take precedence
 # over this when using ConfigLoader. Thus configuration
 # details given here can function as a default configuration,
 # with a external configuration file acting as an override for
 # local deployment.
 
-__PACKAGE__->config( name => 'MyApp' );
+__PACKAGE__->config( name => 'MyAtom' );
 
 # Start the application
 __PACKAGE__->setup;
@@ -34,11 +34,11 @@ __PACKAGE__->setup;
 
 =head1 NAME
 
-MyApp - Catalyst based application
+MyAtom - Catalyst based application
 
 =head1 SYNOPSIS
 
-    script/myapp_server.pl
+    script/myatom_server.pl
 
 =head1 DESCRIPTION
 
@@ -46,7 +46,7 @@ MyApp - Catalyst based application
 
 =head1 SEE ALSO
 
-L<MyApp::Controller::Root>, L<Catalyst>
+L<MyAtom::Controller::Root>, L<Catalyst>
 
 =head1 AUTHOR
 

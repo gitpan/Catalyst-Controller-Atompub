@@ -25,7 +25,7 @@ isa_ok $serv, 'XML::Atom::Service';
 my @work = $serv->workspaces;
 is @work, 1;
 
-is $work[0]->title, 'MyApp';
+is $work[0]->title, 'MyAtom';
 
 my @coll = $work[0]->collections;
 is @coll, 1;

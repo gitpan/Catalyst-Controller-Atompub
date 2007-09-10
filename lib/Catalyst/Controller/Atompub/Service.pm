@@ -63,7 +63,7 @@ Catalyst::Controller::Atompub::Service
 
 =head1 SYNOPSIS
 
-    package MyApp::Controller::MyService;
+    package MyAtom::Controller::MyService;
     use base 'Catalyst::Controller::Atompub::Service';
 
     # Access to http://localhost:3000/myservice and get Service Document

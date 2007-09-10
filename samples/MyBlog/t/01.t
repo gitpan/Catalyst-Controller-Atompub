@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper; $Data::Dumper::Indent = 1;
-use Test::More tests => 98;
+use Test::More tests => 92;
 
 use Atompub::Client;
 use Atompub::MediaType qw( media_type );
@@ -62,7 +62,7 @@ is $uri, 'http://localhost:3000/entrycollection/entry_1.atom';
 is $client->res->code, RC_CREATED;
 is $client->res->location, 'http://localhost:3000/entrycollection/entry_1.atom';
 ok $client->res->etag;
-ok $client->res->last_modified;
+#ok $client->res->last_modified;
 ok media_type( $client->res->content_type )->is_a('entry');
 
 $entry = $client->rc;
@@ -112,7 +112,7 @@ ok $client->updateEntry( $uri, $entry );
 
 is $client->res->code, RC_OK;
 ok $client->res->etag;
-ok $client->res->last_modified;
+#ok $client->res->last_modified;
 ok media_type( $client->res->content_type )->is_a('entry');
 
 $entry = $client->rc;
@@ -138,7 +138,7 @@ is $uri, 'http://localhost:3000/mediacollection/media_1.atom';
 is $client->res->code, RC_CREATED;
 is $client->res->location, 'http://localhost:3000/mediacollection/media_1.atom';
 ok $client->res->etag;
-ok $client->res->last_modified;
+#ok $client->res->last_modified;
 ok media_type( $client->res->content_type )->is_a('entry');
 
 $entry = $client->rc;
@@ -191,7 +191,7 @@ ok $client->updateEntry( $uri, $entry );
 
 is $client->res->code, RC_OK;
 ok $client->res->etag;
-ok $client->res->last_modified;
+#ok $client->res->last_modified;
 ok media_type( $client->res->content_type )->is_a('entry');
 
 $entry = $client->rc;
@@ -204,7 +204,7 @@ ok my $media = $client->getMedia( $media_uri );
 
 is $client->res->code, RC_OK;
 ok $client->res->etag;
-ok $client->res->last_modified;
+#ok $client->res->last_modified;
 
 is $media, read_file( 't/samples/media1.gif', binmode => ':raw' );
 
@@ -218,7 +218,7 @@ ok $client->updateMedia( $media_uri, 't/samples/media2.png', 'image/png' );
 
 is $client->res->code, RC_OK;
 ok $client->res->etag;
-ok $client->res->last_modified;
+#ok $client->res->last_modified;
 
 is $client->rc, read_file( 't/samples/media2.png', binmode => ':raw' );
 

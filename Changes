@@ -1,3 +1,9 @@
+2007-09-11  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.0.2:
+        * samples/MyAtom
+        - rename sample application to MyAtom from MyApp
+
 2007-09-10  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.0.1: created by Module::Starter

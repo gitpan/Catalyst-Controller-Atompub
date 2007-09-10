@@ -1,9 +1,20 @@
-package MyApp::Controller::MyCollection;
+package MyAtom::Controller::MyCollection;
 
 use strict;
 use warnings;
+use base 'Catalyst::Controller::Atompub::Collection';
 
-use base qw( Catalyst::Controller::Atompub::Collection );
+=head1 NAME
+
+MyAtom::Controller::MyCollection - Catalyst Controller
+
+=head1 DESCRIPTION
+
+Catalyst Controller.
+
+=head1 METHODS
+
+=cut
 
 # List resources in a Feed Document, which must be implemented in
 # the mehtod with "Atompub(list)" attribute
@@ -110,5 +121,16 @@ sub delete_entry :Atompub(delete) {
     # Return true on success
     return 1;
 }
+
+=head1 AUTHOR
+
+Takeru INOUE,,,
+
+=head1 LICENSE
+
+This library is free software, you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut
 
 1;

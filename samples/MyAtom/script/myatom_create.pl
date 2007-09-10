@@ -20,17 +20,17 @@ pod2usage(1) if ( $help || !$ARGV[0] );
 
 my $helper = Catalyst::Helper->new( { '.newfiles' => !$force, mech => $mech } );
 
-pod2usage(1) unless $helper->mk_component( 'MyApp', @ARGV );
+pod2usage(1) unless $helper->mk_component( 'MyAtom', @ARGV );
 
 1;
 
 =head1 NAME
 
-myapp_create.pl - Create a new Catalyst Component
+myatom_create.pl - Create a new Catalyst Component
 
 =head1 SYNOPSIS
 
-myapp_create.pl [options] model|view|controller name [helper] [options]
+myatom_create.pl [options] model|view|controller name [helper] [options]
 
  Options:
    -force        don't create a .new file where a file to be created exists
@@ -38,15 +38,15 @@ myapp_create.pl [options] model|view|controller name [helper] [options]
    -help         display this help and exits
 
  Examples:
-   myapp_create.pl controller My::Controller
-   myapp_create.pl -mechanize controller My::Controller
-   myapp_create.pl view My::View
-   myapp_create.pl view MyView TT
-   myapp_create.pl view TT TT
-   myapp_create.pl model My::Model
-   myapp_create.pl model SomeDB DBIC::Schema MyApp::Schema create=dynamic\
+   myatom_create.pl controller My::Controller
+   myatom_create.pl -mechanize controller My::Controller
+   myatom_create.pl view My::View
+   myatom_create.pl view MyView TT
+   myatom_create.pl view TT TT
+   myatom_create.pl model My::Model
+   myatom_create.pl model SomeDB DBIC::Schema MyApp::Schema create=dynamic\
    dbi:SQLite:/tmp/my.db
-   myapp_create.pl model AnotherDB DBIC::Schema MyApp::Schema create=static\
+   myatom_create.pl model AnotherDB DBIC::Schema MyApp::Schema create=static\
    dbi:Pg:dbname=foo root 4321
 
  See also:

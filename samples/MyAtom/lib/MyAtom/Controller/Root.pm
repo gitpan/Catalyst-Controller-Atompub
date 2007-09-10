@@ -1,4 +1,4 @@
-package MyApp::Controller::Root;
+package MyAtom::Controller::Root;
 
 use strict;
 use warnings;
@@ -12,7 +12,7 @@ __PACKAGE__->config->{namespace} = '';
 
 =head1 NAME
 
-MyApp::Controller::Root - Root Controller for MyApp
+MyAtom::Controller::Root - Root Controller for MyAtom
 
 =head1 DESCRIPTION
 

@@ -508,7 +508,7 @@ Catalyst::Controller::Atompub::Collection
 
 =head1 SYNOPSIS
 
-    package MyApp::Controller::MyCollection;
+    package MyAtom::Controller::MyCollection;
     use base 'Catalyst::Controller::Atompub::Collection';
 
     # List resources in a Feed Document, which must be implemented in
@@ -928,7 +928,7 @@ By overriding C<find_version> method, cache control and versioning are enabled.
 The implementation is expected to return I<ETag> and/or I<Last-Modified> value 
 of the requested URI:
 
-    package MyApp::Controller::MyCollection;
+    package MyAtom::Controller::MyCollection;
 
     sub find_version {
         my ( $self, $c, $uri ) = @_;
@@ -966,7 +966,7 @@ By default, if the I<Slug> header is "Entry 1", the resource URI will be like:
 
 This default behavior can be changed by overriding C<find_version> method:
 
-    package MyApp::Controller::MyCollection;
+    package MyAtom::Controller::MyCollection;
 
     sub make_edit_uri {
         my ( $self, $c, %args ) = @_;
