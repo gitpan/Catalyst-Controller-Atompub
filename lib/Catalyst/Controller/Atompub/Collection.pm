@@ -179,7 +179,7 @@ sub _create {
     my $edited = datetime;
 
     if ( $media_type->is_a('entry') ) {
-	my $uri = $self->make_edit_uri( $c );
+	my ( $uri ) = $self->make_edit_uri( $c );
 
 	my $entry = XML::Atom::Entry->new( $c->req->body )
 	    || return $self->error( $c, RC_BAD_REQUEST, XML::Atom::Entry->errstr );
@@ -921,7 +921,7 @@ Returns true on success, false otherwise.
 The following methods can be overridden to change the default behaviors.
 
 
-=head2 $controller->find_version
+=head2 $controller->find_version( $uri )
 
 By overriding C<find_version> method, cache control and versioning are enabled.
 
@@ -958,7 +958,7 @@ the same as the version that the client is basing its modifications on.
 =back
 
 
-=head2 $controller->make_edit_uri
+=head2 $controller->make_edit_uri( $c, [ @args ]);
 
 By default, if the I<Slug> header is "Entry 1", the resource URI will be like:
 
@@ -969,14 +969,20 @@ This default behavior can be changed by overriding C<find_version> method:
     package MyAtom::Controller::MyCollection;
 
     sub make_edit_uri {
-        my ( $self, $c, %args ) = @_;
+        my ( $self, $c, @args ) = @_;
 
-        my $uri = $self->SUPER::make_edit_uri( $c, %args );
+        my @uris = $self->SUPER::make_edit_uri( $c, @args );
 
-        # Modify $uri as you like
+        # Modify @uris as you like
 
-        return $uri;
+        return @uris;
     }
+
+Arguments @args are media types of POSTed resources.
+
+This method returns an array of resource URIs;
+the first element is a URI of the Entry Resource (including Media Link Entry), 
+and the second one is a URI of the Media Resource if exists.
 
 
 =head2 $controller->do_list 

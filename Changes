@@ -1,3 +1,11 @@
+2007-09-12  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.0.3:
+        * samples/MyBlog
+        - returns 404 at MyBlog/Controller/Root.pm
+	* Catalyst/Controller/Collection.pm
+	- rewrite make_edit_uri in POD
+
 2007-09-11  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.0.2:

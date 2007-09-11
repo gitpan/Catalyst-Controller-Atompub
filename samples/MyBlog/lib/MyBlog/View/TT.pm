@@ -1,4 +1,4 @@
-package MyBlog::View::View;
+package MyBlog::View::TT;
 
 use strict;
 use base 'Catalyst::View::TT';
@@ -18,7 +18,7 @@ __PACKAGE__->config({
 
 =head1 NAME
 
-MyBlog::View::MyView - Catalyst TTSite View
+MyBlog::View::TT - Catalyst TTSite View
 
 =head1 SYNOPSIS
 

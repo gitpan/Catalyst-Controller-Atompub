@@ -40,9 +40,8 @@ sub auto :Private {
 
 sub default : Private {
     my ( $self, $c ) = @_;
-
-    # Hello World
-    $c->response->body( $c->welcome_message );
+    $c->res->status('404');
+    $c->response->body('Not Found');
 }
 
 =head2 end

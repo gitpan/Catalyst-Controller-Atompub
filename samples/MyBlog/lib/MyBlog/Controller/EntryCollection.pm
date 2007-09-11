@@ -146,7 +146,7 @@ sub make_edit_uri {
     # insert $dt-$usec before extension
     $_ =~ s{(\.[^./?]+)$}{-$dt-$usec$1} for @uris;
 
-    return wantarray ? @uris : $uris[0];
+    return @uris;
 }
 
 sub find_version {
