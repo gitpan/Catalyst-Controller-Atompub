@@ -14,7 +14,7 @@ use Time::HiRes qw( gettimeofday );
 use base qw( Catalyst::Controller::Atompub::Collection );
 
 my $ENTRIES_PER_PAGE = 10;
-my $TABLE_NAME       = 'resources';
+my $TABLE_NAME       = 'medias';
 
 my $MODEL = join '::', 'DBIC', camelize( $TABLE_NAME );
 
@@ -26,11 +26,6 @@ sub get_feed :Atompub(list) {
 
     my $feed = $self->collection_resource->body;
 
-    my $cond = {
-	uri  => { like => "$uri/%" },
-	type => media_type('entry'),
-    };
-
     my $page = $c->req->param('page') || 1;
 
     my $attr = {
@@ -39,10 +34,10 @@ sub get_feed :Atompub(list) {
 	order_by => 'edited desc',
     };
 
-    my $rs = $c->model( $MODEL )->search( $cond, $attr );
+    my $rs = $c->model( $MODEL )->search( {}, $attr );
 
-    while ( my $entry_resource = $rs->next ) {
-	my $entry = XML::Atom::Entry->new( \$entry_resource->body );
+    while ( my $resource = $rs->next ) {
+	my $entry = XML::Atom::Entry->new( \$resource->entry_body );
 	$feed->add_entry( $entry );
     }
 
@@ -58,49 +53,29 @@ sub get_feed :Atompub(list) {
 sub create_resource :Atompub(create) {
     my ( $self, $c ) = @_;
 
-    my $prefix = $self->media_resource->uri;
-    $prefix =~ s{(?<=\.)[^./]+$}{};
+    # URIs were determined by C::C::Atompub
+    my $entry_uri = $self->media_link_entry->uri;
+    my $media_uri = $self->media_resource->uri;
 
-    return $self->error( $c, RC_CONFLICT, "Resource name is used (change Slug): $prefix" )
-	if $c->model( $MODEL )->search( { uri => { like => "$prefix%" } } )->count;
+    return $self->error( $c, RC_CONFLICT, "Resource name is used (change Slug): $entry_uri" )
+	if $c->model( $MODEL )->search( { entry_uri => $entry_uri } )->count;
 
-    # URI of the new Media Resource, which was determined by C::C::Atompub
-    my $uri = $self->media_resource->uri;
-
-    my $media = MIME::Base64::encode( $self->media_resource->body );
-
-    # Edit $media if needed
+    # Edit $entry and $media if needed ...
 
     my $vals = {
-	uri    => $uri,
-	edited => $self->media_resource->edited->iso,
-	etag   => $self->calculate_new_etag( $c, $uri ),
-	type   => $self->media_resource->type,
-	body   => $media,
+	edited     => $self->edited->iso,
+	entry_uri  => $entry_uri,
+	entry_etag => $self->calculate_new_etag( $c, $entry_uri ),
+	entry_body => $self->media_link_entry->body->as_xml,
+	media_uri  => $media_uri,
+	media_etag => $self->calculate_new_etag( $c, $media_uri ),
+	media_body => MIME::Base64::encode( $self->media_resource->body ),
+	media_type => $self->media_resource->type,
     };
 
     $c->model( $MODEL )->create( $vals )
 	|| return $self->error( $c, RC_INTERNAL_SERVER_ERROR,
 				'Cannot create new media resource' );
-
-    # URI of the new Media Link Entry, which was determined by C::C::Atompub
-    $uri = $self->media_link_entry->uri;
-
-    my $entry = $self->media_link_entry->body;
-
-    # Edit $entry if needed
-
-    $vals = {
-	uri    => $uri,
-	edited => $self->media_link_entry->edited->iso,
-	etag   => $self->calculate_new_etag( $c, $uri ),
-	type   => media_type('entry'),
-	body   => $entry->as_xml,
-    };
-
-    $c->model( $MODEL )->create( $vals )
-	|| return $self->error( $c, RC_INTERNAL_SERVER_ERROR,
-				'Cannot create new media link entry' );
 
     return $self;
 }
@@ -110,16 +85,18 @@ sub get_resource :Atompub(read) {
 
     my $uri = $c->req->uri;
 
-    my $rs = $c->model( $MODEL )->find( { uri => $uri } )
+    my $cond = { '-or' => [ { entry_uri => $uri },
+			    { media_uri => $uri } ] };
+
+    my $rs = $c->model( $MODEL )->search( $cond )->first
 	|| return $self->error( $c, RC_NOT_FOUND );
 
-    my $body;
-    if ( ! media_type( $rs->type )->is_a('entry') ) { # if Media Resource
-	$self->media_resource->type( $rs->type );
-	$self->media_resource->body( MIME::Base64::decode( $rs->body ) );
+    if ( $rs->entry_uri eq $uri ) {
+	$self->media_link_entry->body( XML::Atom::Entry->new( \$rs->entry_body ) );
     }
     else {
-	$self->media_link_entry->body( XML::Atom::Entry->new( \$rs->body ) );
+	$self->media_resource->body( MIME::Base64::decode( $rs->media_body ) );
+	$self->media_resource->type( $rs->media_type );
     }
 
     return $self;
@@ -130,35 +107,36 @@ sub update_resource :Atompub(update) {
 
     my $uri = $c->req->uri;
 
-    my $edited;
-    my $type;
-    my $body;
-    if ( $self->media_resource ) {
-	$edited = $self->media_resource->edited->iso;
-	$type   = $self->media_resource->type;
-	$body   = MIME::Base64::encode( $self->media_resource->body );
-    }
-    elsif ( $self->media_link_entry ) {
-	$edited = $self->media_link_entry->edited->iso;
-	$type   = media_type('entry');
-	$body   = $self->media_link_entry->body->as_xml;
+    my $cond = { '-or' => [ { entry_uri => $uri },
+			    { media_uri => $uri } ] };
+
+    my $rs = $c->model( $MODEL )->search( $cond )->first
+	|| return $self->error( $c, RC_NOT_FOUND );
+
+    my $vals = { edited => $self->edited->iso };
+
+    if ( $rs->entry_uri eq $uri ) {
+	$vals->{entry_etag} = $self->calculate_new_etag( $c, $uri );
+	$vals->{entry_body} = $self->media_link_entry->body->as_xml;
+
+	# Don't update the Last-Modified value of the corresponding Media Resource if you use it
     }
     else {
-	return $self->error( $c, RC_INTERNAL_SERVER_ERROR, 'No resource' );
+	# app:edited and atom:updated MUST be updated even when the cooresponding Media Resource is updated
+	my $entry = XML::Atom::Entry->new( \$rs->entry_body )
+	    || return $self->error( $c );
+	$entry->edited( $self->edited->w3c );
+	$entry->updated( $self->edited->w3c );
+
+	$vals->{entry_etag} = $self->calculate_new_etag( $c, $rs->entry_uri );
+	$vals->{entry_body} = $entry->as_xml;
+
+	$vals->{media_etag} = $self->calculate_new_etag( $c, $rs->media_uri );
+	$vals->{media_body} = MIME::Base64::encode( $self->media_resource->body );
+	$vals->{media_type} = $self->media_resource->type;
+
+	# Do update the Last-Modified value of the Media Resource if you use it
     }
-
-    # Edit $body if needed
-
-    my $vals = {
-	uri    => $uri,
-	edited => $edited,
-	etag   => $self->calculate_new_etag( $c, $uri ),
-	type   => $type,
-	body   => $body,
-    };
-
-    my $rs = $c->model( $MODEL )->find( { uri => $uri } )
-	|| return $self->error( $c, RC_NOT_FOUND );
 
     $rs->update( $vals )
 	|| return $self->error( $c, RC_INTERNAL_SERVER_ERROR, "Cannot update resource: $uri" );
@@ -169,15 +147,15 @@ sub update_resource :Atompub(update) {
 sub delete_resource :Atompub(delete) {
     my ( $self, $c ) = @_;
 
-    my $prefix = my $uri = $c->req->uri;
-    $prefix =~ s{(?<=\.)[^./]+$}{};
+    my $uri = $c->req->uri;
 
-    # delete entry and media resources at once
-    my $cond = { uri => { like => "$prefix%" } };
+    my $cond = { '-or' => [ { entry_uri => $uri },
+			    { media_uri => $uri } ] };
 
-    my $rs = $c->model( $MODEL )->search( $cond )
+    my $rs = $c->model( $MODEL )->search( $cond )->first
 	|| return $self->error( $c, RC_NOT_FOUND );
 
+    # delete entry and media resources at once
     $rs->delete
 	|| return $self->error( $c, RC_INTERNAL_SERVER_ERROR, "Cannot delete resource: $uri" );
 
@@ -189,9 +167,12 @@ sub make_edit_uri {
 
     my @uris = $self->SUPER::make_edit_uri( $c, @args );
 
+    my $cond = { '-or' => [ { entry_uri => $uris[0] },
+			    { media_uri => $uris[0] } ] };
+
     # return, if $uris[0] is not used
     return wantarray ? @uris : $uris[0]
-	unless $c->model( $MODEL )->find( { uri => $uris[0] } );
+	unless $c->model( $MODEL )->search( $cond )->count;
 
     my ( $sec, $usec ) = gettimeofday;
     my $dt = strftime '%Y%m%d-%H%M%S', localtime( $sec );
@@ -206,10 +187,17 @@ sub make_edit_uri {
 sub find_version {
     my ( $self, $c, $uri ) = @_;
 
-    my $rs = $c->model( $MODEL )->find( { uri => $uri } ) || return;
+    my $cond = { '-or' => [ { entry_uri => $uri },
+			    { media_uri => $uri } ] };
 
-    return ( etag => $rs->etag );
-#    return ( etag => $rs->etag, last_modified => datetime( $rs->edited )->str );
+    my $rs = $c->model( $MODEL )->search( $cond )->first || return;
+
+    if ( $rs->entry_uri eq $uri ) {
+	return ( etag => $rs->entry_etag );
+    }
+    else {
+	return ( etag => $rs->media_etag );
+    }
 }
 
 sub calculate_new_etag {

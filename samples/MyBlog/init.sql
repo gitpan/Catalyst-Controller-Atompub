@@ -1,20 +1,36 @@
-DROP TABLE IF EXISTS resources;
+DROP TABLE IF EXISTS entries;
+DROP TABLE IF EXISTS medias;
 DROP TABLE IF EXISTS users;
 
-CREATE TABLE resources (
+CREATE TABLE entries (
   id		INT		AUTO_INCREMENT,
+  edited	TIMESTAMP,
 
   uri		VARCHAR(255)	NOT NULL,
-
-  edited	TIMESTAMP,			# edited and last-modified
   etag		VARCHAR(255),
-
-  type		VARCHAR(32)	NOT NULL,
-  body		TEXT		NOT NULL,	# XML or Base64
+  body		TEXT		NOT NULL,	# XML
 
   PRIMARY KEY(id),
   UNIQUE(uri)
 );
+
+CREATE TABLE medias (
+  id		INT		AUTO_INCREMENT,
+  edited	TIMESTAMP,
+
+  entry_uri	VARCHAR(255)	NOT NULL,
+  entry_etag	VARCHAR(255),
+  entry_body	TEXT		NOT NULL,	# XML
+
+  media_uri	VARCHAR(255)	NOT NULL,
+  media_etag	VARCHAR(255),
+  media_body	TEXT		NOT NULL,	# Base64
+  media_type	VARCHAR(32)	NOT NULL,
+
+  PRIMARY KEY(id),
+  UNIQUE(entry_uri)
+);
+
 
 CREATE TABLE users (
   id		INT		AUTO_INCREMENT,

@@ -46,12 +46,12 @@ sub create_entry :Atompub(create) {
     # URI of the new Entry, which was determined by C::C::Atompub
     my $uri = $self->entry_resource->uri;
 
-    # POSTed Entry (XML::Atom::Entry)
-    my $entry = $self->entry_resource->body;
-
     # app:edited element, which was assigned by C::C::Atompub,
     # is coverted into ISO 8601 format like '2007-01-01 00:00:00'
-    my $edited = $self->entry_resource->edited->iso;
+    my $edited = $self->edited->iso;
+
+    # POSTed Entry (XML::Atom::Entry)
+    my $entry = $self->entry_resource->body;
 
     # Create new Entry
     $c->model('DBIC::Entries')->create( {
@@ -89,12 +89,12 @@ sub update_entry :Atompub(update) {
 
     my $uri = $c->req->uri;
 
-    # PUTted Entry (XML::Atom::Entry)
-    my $entry = $self->entry_resource->body;
-
     # app:edited element, which was assigned by C::C::Atompub,
     # is coverted into ISO 8601 format like '2007-01-01 00:00:00'
-    my $edited = $self->entry_resource->edited->iso;
+    my $edited = $self->edited->iso;
+
+    # PUTted Entry (XML::Atom::Entry)
+    my $entry = $self->entry_resource->body;
 
     # Update the Entry
     $c->model('DBIC::Entries')->find( { uri => $uri } )

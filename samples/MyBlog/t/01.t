@@ -1,9 +1,10 @@
 use strict;
 use warnings;
 use Data::Dumper; $Data::Dumper::Indent = 1;
-use Test::More tests => 92;
+use Test::More tests => 93;
 
 use Atompub::Client;
+use Atompub::DateTime qw( datetime );
 use Atompub::MediaType qw( media_type );
 use File::Slurp;
 use FindBin;
@@ -214,6 +215,9 @@ is $client->res->code, RC_NOT_MODIFIED;
 
 # Update Media Resource
 
+my $prev_updated = $entry->updated;
+sleep 1;
+
 ok $client->updateMedia( $media_uri, 't/samples/media2.png', 'image/png' );
 
 is $client->res->code, RC_OK;
@@ -221,6 +225,8 @@ ok $client->res->etag;
 #ok $client->res->last_modified;
 
 is $client->rc, read_file( 't/samples/media2.png', binmode => ':raw' );
+
+ok datetime( $client->getEntry( $uri )->updated ) > datetime( $prev_updated );
 
 
 # Delete Entry Resource

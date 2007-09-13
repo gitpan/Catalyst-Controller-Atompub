@@ -13,7 +13,7 @@ use Time::HiRes qw( gettimeofday );
 use base qw( Catalyst::Controller::Atompub::Collection );
 
 my $ENTRIES_PER_PAGE = 10;
-my $TABLE_NAME       = 'resources';
+my $TABLE_NAME       = 'entries';
 
 my $MODEL = join '::', 'DBIC', camelize( $TABLE_NAME );
 
@@ -25,11 +25,6 @@ sub get_feed :Atompub(list) {
 
     my $feed = $self->collection_resource->body;
 
-    my $cond = {
-	uri  => { like => "$uri/%" },
-	type => media_type('entry'),
-    };
-
     my $page = $c->req->param('page') || 1;
 
     my $attr = {
@@ -38,10 +33,10 @@ sub get_feed :Atompub(list) {
 	order_by => 'edited desc',
     };
 
-    my $rs = $c->model( $MODEL )->search( $cond, $attr );
+    my $rs = $c->model( $MODEL )->search( {}, $attr );
 
-    while ( my $entry_resource = $rs->next ) {
-	my $entry = XML::Atom::Entry->new( \$entry_resource->body );
+    while ( my $resource = $rs->next ) {
+	my $entry = XML::Atom::Entry->new( \$resource->body );
 	$feed->add_entry( $entry );
     }
 
@@ -66,10 +61,9 @@ sub create_resource :Atompub(create) {
     # Edit $entry if needed
 
     my $vals = {
+	edited => $self->edited->iso,
 	uri    => $uri,
-	edited => $self->entry_resource->edited->iso,
 	etag   => $self->calculate_new_etag( $c, $uri ),
-	type   => media_type('entry'),
 	body   => $entry->as_xml,
     };
 
@@ -103,10 +97,9 @@ sub update_resource :Atompub(update) {
 	|| return $self->error( $c, RC_NOT_FOUND );
 
     my $vals = {
+	edited => $self->edited->iso,
 	uri    => $uri,
-	edited => $self->entry_resource->edited->iso,
 	etag   => $self->calculate_new_etag( $c, $uri ),
-	type   => media_type('entry'),
 	body   => $self->entry_resource->body->as_xml,
     };
 

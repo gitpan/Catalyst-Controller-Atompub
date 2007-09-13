@@ -27,19 +27,16 @@ use Atompub::Util qw( is_acceptable_media_type );
 use String::CamelCase qw( camelize );
 
 my $ENTRIES_PER_PAGE = 10;
-my $TABLE_NAME       = 'resources';
+my $ENTRY_TABLE_NAME = 'entries';
+my $MEDIA_TABLE_NAME = 'medias';
 
-my $MODEL = join '::', 'DBIC', camelize( $TABLE_NAME );
+my $ENTRY_MODEL = join '::', 'DBIC', camelize( $ENTRY_TABLE_NAME );
+my $MEDIA_MODEL = join '::', 'DBIC', camelize( $MEDIA_TABLE_NAME );
 
-sub _read_collection {
-    my ( $self, $c, $coll, $is_media ) = @_;
+sub index : Private {
+    my ( $self, $c ) = @_;
 
-    return unless $coll;
-
-    my $cond = {
-	uri  => { like => $coll->href . '/%' },
-	type => media_type('entry'),
-    };
+    my @colls;
 
     my $page = $c->req->param('page') || 1;
 
@@ -49,44 +46,39 @@ sub _read_collection {
 	order_by => 'edited desc',
     };
 
-    my $rs = $c->model( $MODEL )->search( $cond, $attr );
+    my $rs = $c->model( $ENTRY_MODEL )->search( {}, $attr );
 
     my @entries;
-    while ( my $entry_resource = $rs->next ) {
-	my $entry = XML::Atom::Entry->new( \$entry_resource->body );
+    while ( my $resource = $rs->next ) {
+	my $entry = XML::Atom::Entry->new( \$resource->body );
 
-	my $content;
-	if ( $is_media ) {
-	    my $uri = $entry->edit_media_link;
-	    $content = qq{<a href="$uri"><img src="$uri"/></a>};
-	}
-	else {
-	    $content = $entry->content->body;
-	}
-
-	my $uri = $entry->edit_link;
-	my $title = qq{<a href="$uri">} . $entry->title . '</a>';
+	my $uri     = $entry->edit_link;
+	my $title   = qq{<a href="$uri">} . $entry->title . '</a>';
+	my $content = $entry->content->body;
 
 	push @entries, { updated => datetime( $entry->updated )->str,
 			 title   => $title,
 			 content => $content };
     }
 
-    return {
-	title => $coll->title,
-	entries => \@entries,
-    };
-}
+    push @colls, { title => 'Diary', entries => \@entries };
 
-sub index : Private {
-    my ( $self, $c ) = @_;
+    $rs = $c->model( $MEDIA_MODEL )->search( {}, $attr );
 
-    my $collection_info = Catalyst::Controller::Atompub::Info->instance( $self );
+    my @media_link_entries;
+    while ( my $resource = $rs->next ) {
+	my $entry = XML::Atom::Entry->new( \$resource->entry_body );
 
-    my @colls = map { $self->_read_collection( $c, $_->[0], $_->[1] ) }
-                map { [ $_, is_acceptable_media_type( $_, 'image/png' ) ] }
-                map { $collection_info->get( $c, $_ ) }
-              keys %{ $c->components };
+	my $uri     = $entry->content->src;
+	my $title   = qq{<a href="$uri">} . $entry->title . '</a>';
+	my $content = qq{<a href="$uri"><img src="$uri"/></a>};
+
+	push @media_link_entries, { updated => datetime( $entry->updated )->str,
+				    title   => $title,
+				    content => $content };
+    }
+
+    push @colls, { title => 'Photo', entries => \@media_link_entries };
 
     $c->stash->{collections} = \@colls;
 }

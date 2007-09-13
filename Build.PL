@@ -11,7 +11,7 @@ my $builder = Module::Build->new(
         'Test::More' => 0,
         'version'    => 0,
 
-	'Atompub' => '0.1.0',
+	'Atompub' => '0.1.2',
 	'Catalyst::Runtime' => 5.7,
         'File::Slurp' => 0,
 	'FindBin' => 0,

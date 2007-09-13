@@ -2,8 +2,9 @@ DROP TABLE IF EXISTS entries;
 
 CREATE TABLE entries (
   id		INT		AUTO_INCREMENT,
-  uri		VARCHAR(255)	NOT NULL,
   edited	TIMESTAMP,
+
+  uri		VARCHAR(255)	NOT NULL,
   xml		TEXT		NOT NULL,
 
   PRIMARY KEY(id),

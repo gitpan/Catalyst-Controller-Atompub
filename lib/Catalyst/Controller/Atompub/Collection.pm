@@ -17,6 +17,8 @@ use XML::Atom::Entry;
 
 use base qw( Catalyst::Controller::Atompub::Base );
 
+__PACKAGE__->mk_accessors( qw( edited ) );
+
 my %COLLECTION_METHOD = ( GET    => '_list',
 			  POST   => '_create' );
 my %RESOURCE_METHOD   = ( GET    => '_read',
@@ -176,7 +178,7 @@ sub _create {
     return $self->error( $c, RC_UNSUPPORTED_MEDIA_TYPE, "Unsupported media type: $media_type" )
 	unless is_acceptable_media_type( $coll, $media_type );
 
-    my $edited = datetime;
+    $self->edited( datetime );
 
     if ( $media_type->is_a('entry') ) {
 	my ( $uri ) = $self->make_edit_uri( $c );
@@ -187,16 +189,16 @@ sub _create {
 	return $self->error( $c, RC_BAD_REQUEST, 'Forbidden category' )
 	    unless is_allowed_category( $coll, $entry->category );
 
-	$entry->edited( $edited->w3c );
-	$entry->updated( $edited->w3c ) unless $entry->updated;
+	$entry->edited( $self->edited->w3c );
+	$entry->updated( $self->edited->w3c ) unless $entry->updated;
 
 	$entry->id( $uri );
 
 	$entry->edit_link( $uri );
 
 	my $rc = Catalyst::Controller::Atompub::Collection::Resource->new;
+	$rc->edited( $self->edited ); # XXX DEPRECATED
 	$rc->uri( $uri );
-	$rc->edited( $edited );
 	$rc->body( $entry );
 	$self->entry_resource( $rc );
     }
@@ -209,8 +211,8 @@ sub _create {
 
 	my $entry = XML::Atom::Entry->new;
 
-	$entry->edited( $edited->w3c );
-	$entry->updated( $edited->w3c ) unless $entry->updated;
+	$entry->edited( $self->edited->w3c );
+	$entry->updated( $self->edited->w3c ) unless $entry->updated;
 
 	my $link = XML::Atom::Link->new;
 	$link->rel('edit-media');
@@ -225,8 +227,8 @@ sub _create {
 	$entry->content( $content );
 
 	my $rc = Catalyst::Controller::Atompub::Collection::Resource->new;
+	$rc->edited( $self->edited ); # XXX DEPRECATED
 	$rc->uri( $media_uri );
-	$rc->edited( $edited );
 	$rc->body( $media );
 	$rc->type( $media_type );
 	$self->media_resource( $rc );
@@ -239,8 +241,8 @@ sub _create {
 	$entry->add_link( $link );
 
 	$rc = Catalyst::Controller::Atompub::Collection::Resource->new;
+	$rc->edited( $self->edited ); # XXX DEPRECATED
 	$rc->uri( $entry_uri );
-	$rc->edited( $edited );
 	$rc->body( $entry );
 	$self->media_link_entry( $rc );
     }
@@ -284,7 +286,6 @@ sub _read {
 
     return $c->res->status( RC_NOT_MODIFIED ) unless $self->_is_modified( $c );
 
-    my $collection_uri = $self->info->get( $c, $self )->href;
     my $uri = $c->req->uri;
 
     my @accepts = $self->info->get( $c, $self )->accepts;
@@ -341,9 +342,8 @@ sub _update {
               # XXX Entries are okay, this is because Media Link Entries can be PUT
               #     even to the Media Resource Collection
 
-    my $edited = datetime;
+    $self->edited( datetime );
 
-    my $collection_uri = $self->info->get( $c, $self )->href;
     my $uri = $c->req->uri;
 
     my $content;
@@ -354,8 +354,8 @@ sub _update {
 	return $self->error( $c, RC_BAD_REQUEST, 'Forbidden category' )
 	    unless is_allowed_category( $coll, $entry->category );
 
-	$entry->edited( $edited->w3c );
-	$entry->updated( $edited->w3c ) unless $entry->updated;
+	$entry->edited( $self->edited->w3c );
+	$entry->updated( $self->edited->w3c ) unless $entry->updated;
 
 	$entry->id( $uri );
 
@@ -374,8 +374,8 @@ sub _update {
     }
 
     my $rc = Catalyst::Controller::Atompub::Collection::Resource->new;
+    $rc->edited( $self->edited ); # XXX DEPRECATED
     $rc->uri( $uri );
-    $rc->edited( $edited );
     $rc->body( $content );
     $rc->type( $media_type );
     $self->rc( $rc );
@@ -408,10 +408,10 @@ sub _update {
 sub _delete {
     my ( $self, $c ) = @_;
 
-    return $self->error( $c, RC_PRECONDITION_FAILED )
-	if $self->_is_modified( $c );
+# If-Match nor If-Unmodified-Since header is not required on DELETE
+#    return $self->error( $c, RC_PRECONDITION_FAILED )
+#	if $self->_is_modified( $c );
 
-    my $collection_uri = $self->info->get( $c, $self )->href;
     my $uri = $c->req->uri;
 
     my $rc = Catalyst::Controller::Atompub::Collection::Resource->new;
@@ -471,7 +471,18 @@ use Atompub::MediaType qw( media_type );
 
 use base qw( Class::Accessor::Fast );
 
-__PACKAGE__->mk_accessors( qw( uri edited type body ) );
+__PACKAGE__->mk_accessors( qw( uri type body ) );
+
+sub edited {
+    my $self = shift;
+    if (@_) {
+	$self->{edited} = $_[0];
+    }
+    else {
+	warn '$collection->$resource->edited is DEPRECATED, and see $collection->edited';
+	return $self->{edited};
+    }
+}
 
 sub is_collection {
     my $self = shift;
@@ -504,6 +515,26 @@ __END__
 
 Catalyst::Controller::Atompub::Collection
 - A Catalyst controller for the Atom Collection Resources
+
+
+=head1 COMPATIBILITY ISSUES
+
+An accessor for I<edited> was obsoleted since v0.0.4.
+
+    package MyAtom::Controller::MyCollection;
+    use base 'Catalyst::Controller::Atompub::Collection';
+
+    sub create_entry :Atompub(create) {
+        # ...
+
+        # Old accessor (can be still used, but will be removed)
+        $self->entry_resource->edited;
+
+        # New accessor
+        $self->edited;
+
+        # ...
+    }
 
 
 =head1 SYNOPSIS
@@ -541,12 +572,12 @@ Catalyst::Controller::Atompub::Collection
         # URI of the new Entry, which was determined by C::C::Atompub
         my $uri = $self->entry_resource->uri;
     
-        # POSTed Entry (XML::Atom::Entry)
-        my $entry = $self->entry_resource->body;
-    
         # app:edited element, which was assigned by C::C::Atompub,
         # is coverted into ISO 8601 format like '2007-01-01 00:00:00'
-        my $edited = $self->entry_resource->edited->iso;
+        my $edited = $self->edited->iso;
+
+        # POSTed Entry (XML::Atom::Entry)
+        my $entry = $self->entry_resource->body;
     
         # Create new Entry
         $c->model('DBIC::Entries')->create( {
@@ -584,12 +615,12 @@ Catalyst::Controller::Atompub::Collection
     
         my $uri = $c->req->uri;
     
-        # PUTted Entry (XML::Atom::Entry)
-        my $entry = $self->entry_resource->body;
-    
         # app:edited element, which was assigned by C::C::Atompub,
         # is coverted into ISO 8601 format like '2007-01-01 00:00:00'
-        my $edited = $self->entry_resource->edited->iso;
+        my $edited = $self->edited->iso;
+
+        # PUTted Entry (XML::Atom::Entry)
+        my $entry = $self->entry_resource->body;
     
         # Update the Entry
         $c->model('DBIC::Entries')->find( { uri => $uri } )
@@ -1026,6 +1057,11 @@ An accessor for a Media Resource object.
 =head2 $controller->media_link_entry
 
 An accessor for a Media Link Entry object.
+
+
+=head2 $controller->edited
+
+An accessor for a app:edited, which is applied for the POSTed/PUTted Entry Resource.
 
 
 =head1 INTERNAL INTERFACES
