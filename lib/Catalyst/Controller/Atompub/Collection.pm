@@ -980,7 +980,7 @@ The behavior of Atompub server will be changed in the following manner:
 Status code of 304 (Not Modified) will be returned, 
 if the requested resource has not been changed.
 
-=item * On PUT or DELETE request
+=item * On PUT request
 
 Status code of 412 (Precondition Failed) will be returned, 
 if the current version of the resource that a client is modifying is not

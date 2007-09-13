@@ -1,5 +1,11 @@
 2007-09-14  Takeru INOUE  <takeru.inoue _ gmail.com>
 
+        * release 0.1.1:
+	* Catalyst/Controller/Atompub/Collection.pm
+	- fix POD on cache control
+
+2007-09-14  Takeru INOUE  <takeru.inoue _ gmail.com>
+
         * release 0.1.0:
 	- thanks Tim for testing
 	* Catalyst/Controller/Atompub/Collection.pm
