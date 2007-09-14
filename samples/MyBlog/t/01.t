@@ -215,7 +215,8 @@ is $client->res->code, RC_NOT_MODIFIED;
 
 # Update Media Resource
 
-my $prev_updated = $entry->updated;
+# XXX Entry can not have app:edited, you SHOULD get it from Feed generally
+my $prev_edited = $entry->edited;
 sleep 1;
 
 ok $client->updateMedia( $media_uri, 't/samples/media2.png', 'image/png' );
@@ -226,7 +227,8 @@ ok $client->res->etag;
 
 is $client->rc, read_file( 't/samples/media2.png', binmode => ':raw' );
 
-ok datetime( $client->getEntry( $uri )->updated ) > datetime( $prev_updated );
+# XXX Entry can not have app:edited, you SHOULD get it from Feed generally
+ok datetime( $client->getEntry( $uri )->edited ) > datetime( $prev_edited );
 
 
 # Delete Entry Resource

@@ -1,5 +1,12 @@
 2007-09-14  Takeru INOUE  <takeru.inoue _ gmail.com>
 
+        * release 0.1.2:
+	* samples/MyBlog
+	- don't update atom:updated in a Media Link Entry when the
+	  corresponding Media Resource is updated
+
+2007-09-14  Takeru INOUE  <takeru.inoue _ gmail.com>
+
         * release 0.1.1:
 	* Catalyst/Controller/Atompub/Collection.pm
 	- fix POD on cache control
@@ -13,8 +20,8 @@
 	- move an accessor for edited to the parent module
 	  Catalyst::Controller::Atompub::Collection
 	* samples/MyBlog
-	- update atom:updated in a Media Link Entry when the corresponding
-	  Media Resource is updated
+	- update app:edited and atom:updated in a Media Link Entry when
+	  the corresponding Media Resource is updated
 	- change DB schema
 
 2007-09-12  Takeru INOUE  <takeru.inoue _ gmail.com>

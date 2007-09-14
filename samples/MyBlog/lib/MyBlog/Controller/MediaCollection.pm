@@ -126,7 +126,6 @@ sub update_resource :Atompub(update) {
 	my $entry = XML::Atom::Entry->new( \$rs->entry_body )
 	    || return $self->error( $c );
 	$entry->edited( $self->edited->w3c );
-	$entry->updated( $self->edited->w3c );
 
 	$vals->{entry_etag} = $self->calculate_new_etag( $c, $rs->entry_uri );
 	$vals->{entry_body} = $entry->as_xml;

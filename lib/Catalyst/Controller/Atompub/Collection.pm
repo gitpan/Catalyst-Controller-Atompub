@@ -519,7 +519,7 @@ Catalyst::Controller::Atompub::Collection
 
 =head1 COMPATIBILITY ISSUES
 
-An accessor for I<edited> was obsoleted since v0.0.4.
+An accessor for I<edited> was obsoleted since v0.1.0.
 
     package MyAtom::Controller::MyCollection;
     use base 'Catalyst::Controller::Atompub::Collection';
