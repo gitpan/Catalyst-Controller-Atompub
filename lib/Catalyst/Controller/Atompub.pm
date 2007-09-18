@@ -4,9 +4,9 @@ use warnings;
 use strict;
 use Carp;
 
-use version; our $VERSION = qv('0.1.3');
+use version; our $VERSION = qv('0.1.4');
 
-use Atompub 0.1.2;
+use Atompub 0.1.5;
 use Catalyst::Request;
 use Catalyst::Response;
 

@@ -11,7 +11,7 @@ my $builder = Module::Build->new(
         'Test::More' => 0,
         'version'    => 0,
 
-	'Atompub' => '0.1.2',
+	'Atompub' => '0.1.5',
 	'Catalyst::Runtime' => 5.7,
         'File::Slurp' => 0,
 	'FindBin' => 0,
@@ -22,8 +22,6 @@ my $builder = Module::Build->new(
         'Test::Perl::Critic' => 0,
 	'Test::WWW::Mechanize::Catalyst' => 0,
 	'URI::Escape' => 0,
-        'XML::Atom' => 0.25,
-        'XML::Atom::Service' => '0.15.0',
     },
     add_to_cleanup      => [ 'Catalyst-Controller-Atompub-*' ],
 );

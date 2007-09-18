@@ -41,11 +41,10 @@ sub get_feed :Atompub(list) {
 	$feed->add_entry( $entry );
     }
 
-    my $num_entries = $rs->count;
-
+    $feed->alternate_link( $c->req->base . 'html' );
     $feed->first_link( $uri );
     $feed->previous_link( "$uri?page=" . ($page-1) ) if $page > 1;
-    $feed->next_link( "$uri?page=" . ($page+1) ) if $num_entries >= $ENTRIES_PER_PAGE;
+    $feed->next_link( "$uri?page=" . ($page+1) ) if $rs->count >= $ENTRIES_PER_PAGE;
 
     return $self;
 }
