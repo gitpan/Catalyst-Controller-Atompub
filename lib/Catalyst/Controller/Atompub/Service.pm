@@ -14,11 +14,13 @@ sub default :Private {
     my ( $self, $c ) = @_;
 
     $self->{service} ||= $self->_make_service( $c );
-    $self->{service}   = $self->modify_service( $c, $self->service );
+    $self->{service}   = $self->modify_service( $c, $self->service )
+	|| $self->error( $c );
 
-    $c->res->content_type( media_type('service') );
+    $c->res->content_type( media_type('service') )
+	unless $c->res->content_type;
 
-    $c->res->body( $self->service->as_xml );
+    $c->res->body( $self->service->as_xml ) unless length $c->res->body;
 }
 
 sub modify_service {

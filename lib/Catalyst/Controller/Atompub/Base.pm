@@ -21,11 +21,21 @@ sub new {
 }
 
 sub error {
-    my ( $self, $c, $status, $message ) = @_;
+    my ( $self, $c, @args ) = @_;
 
     return if ! is_success $c->res->status && $c->res->body;
 
-    $c->res->status( $status ||= RC_INTERNAL_SERVER_ERROR );
+    my ( $status, $message );
+
+    if ( @args == 1 && $status =~ /^(\d{3})\s*(.*)/ ) {
+	( $status, $message ) = ( $1, $2 );
+    }
+    elsif ( @args > 1 ) {
+	( $status, $message ) = @args;
+    }
+
+    $status ||= RC_INTERNAL_SERVER_ERROR;
+    $c->res->status( $status );
 
     $message ||= status_message( $status );
     my $report = "$status $message";

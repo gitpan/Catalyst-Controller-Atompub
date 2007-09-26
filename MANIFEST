@@ -88,6 +88,7 @@ samples/MyBlog/root/static/images/btn_88x31_built_shadow.png
 samples/MyBlog/root/static/images/btn_88x31_powered.png
 samples/MyBlog/root/static/images/btn_88x31_powered_shadow.png
 samples/MyBlog/root/static/images/catalyst_logo.png
+samples/MyBlog/root/static/images/valid-atom.png
 samples/MyBlog/script/myblog_cgi.pl
 samples/MyBlog/script/myblog_create.pl
 samples/MyBlog/script/myblog_fastcgi.pl
