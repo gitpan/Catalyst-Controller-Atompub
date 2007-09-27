@@ -1,3 +1,9 @@
+2007-09-27  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.1.6:
+	* Catalyst/Controller/Atompub/Base
+	- modify error handling
+
 2007-09-26  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.1.5:

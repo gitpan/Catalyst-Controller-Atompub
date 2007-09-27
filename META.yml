@@ -1,6 +1,6 @@
 ---
 name: Catalyst-Controller-Atompub
-version: 0.1.5
+version: 0.1.6
 author:
   - 'Takeru INOUE <takeru.inoue _ gmail.com>'
 abstract: A Catalyst controller for the Atom Publishing Protocol
@@ -8,7 +8,7 @@ license: perl
 resources:
   license: http://dev.perl.org/licenses/
 requires:
-  Atompub: 0.1.5
+  Atompub: 0.1.6
   Catalyst::Runtime: 5.7
   File::Slurp: 0
   FindBin: 0
@@ -24,7 +24,7 @@ requires:
 provides:
   Catalyst::Controller::Atompub:
     file: lib/Catalyst/Controller/Atompub.pm
-    version: 0.1.5
+    version: 0.1.6
   Catalyst::Controller::Atompub::Base:
     file: lib/Catalyst/Controller/Atompub/Base.pm
   Catalyst::Controller::Atompub::Collection:

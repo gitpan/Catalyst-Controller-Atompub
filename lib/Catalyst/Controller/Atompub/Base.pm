@@ -25,14 +25,10 @@ sub error {
 
     return if ! is_success $c->res->status && $c->res->body;
 
-    my ( $status, $message );
-
-    if ( @args == 1 && $status =~ /^(\d{3})\s*(.*)/ ) {
-	( $status, $message ) = ( $1, $2 );
-    }
-    elsif ( @args > 1 ) {
-	( $status, $message ) = @args;
-    }
+    my ( $status, $message )
+	= @args == 1 && $args[0] =~ /^(\d{3})\s*(.*)/ ? ( $1, $2 )
+	: @args  > 1                                  ?  @args
+	:                                               ();
 
     $status ||= RC_INTERNAL_SERVER_ERROR;
     $c->res->status( $status );
