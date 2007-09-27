@@ -1,7 +1,13 @@
 2007-09-27  Takeru INOUE  <takeru.inoue _ gmail.com>
 
+        * release 0.1.7:
+	* Catalyst/Controller/Atompub/Collection.pm
+	- modify POD slightly
+
+2007-09-27  Takeru INOUE  <takeru.inoue _ gmail.com>
+
         * release 0.1.6:
-	* Catalyst/Controller/Atompub/Base
+	* Catalyst/Controller/Atompub/Base.pm
 	- modify error handling
 
 2007-09-26  Takeru INOUE  <takeru.inoue _ gmail.com>

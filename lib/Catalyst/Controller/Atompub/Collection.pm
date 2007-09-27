@@ -1031,12 +1031,9 @@ and the second one is a URI of the Media Resource if exists.
 
 =head2 $controller->resource
 
-An accessor for a resource object except Media Link Entry.
-
-
 =head2 $controller->rc
 
-An alias for $controller->resource
+An accessor for a resource object except Media Link Entry.
 
 
 =head2 $controller->collection_resource
