@@ -1,18 +1,24 @@
+2007-10-02  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.1.8:
+	* Build.PL
+	- specify the version of Catalyst::Plugin::Static::Simple
+
 2007-09-27  Takeru INOUE  <takeru.inoue _ gmail.com>
 
-        * release 0.1.7:
+	* release 0.1.7:
 	* Catalyst/Controller/Atompub/Collection.pm
 	- modify POD slightly
 
 2007-09-27  Takeru INOUE  <takeru.inoue _ gmail.com>
 
-        * release 0.1.6:
+	* release 0.1.6:
 	* Catalyst/Controller/Atompub/Base.pm
 	- modify error handling
 
 2007-09-26  Takeru INOUE  <takeru.inoue _ gmail.com>
 
-        * release 0.1.5:
+	* release 0.1.5:
 	* Catalyst/Controller/Atompub/Service
 	- don't set Content-Type and body if already set
 	* Catalyst/Controller/Atompub/Base
@@ -20,7 +26,7 @@
 
 2007-09-18  Takeru INOUE  <takeru.inoue _ gmail.com>
 
-        * release 0.1.4:
+	* release 0.1.4:
 	* samples/MyBlog
 	- add /feed/link[@type=alternate]
 	* Build.PL
@@ -28,26 +34,26 @@
 
 2007-09-16  Takeru INOUE  <takeru.inoue _ gmail.com>
 
-        * release 0.1.3:
+	* release 0.1.3:
 	* Makefile.PL
 	- build_class => Module::Build
 
 2007-09-14  Takeru INOUE  <takeru.inoue _ gmail.com>
 
-        * release 0.1.2:
+	* release 0.1.2:
 	* samples/MyBlog
 	- don't update atom:updated in a Media Link Entry when the
 	  corresponding Media Resource is updated
 
 2007-09-14  Takeru INOUE  <takeru.inoue _ gmail.com>
 
-        * release 0.1.1:
+	* release 0.1.1:
 	* Catalyst/Controller/Atompub/Collection.pm
 	- fix POD on cache control
 
 2007-09-14  Takeru INOUE  <takeru.inoue _ gmail.com>
 
-        * release 0.1.0:
+	* release 0.1.0:
 	- thanks Tim for testing
 	* Catalyst/Controller/Atompub/Collection.pm
 	- don't check If-Match on DELETE
@@ -60,18 +66,18 @@
 
 2007-09-12  Takeru INOUE  <takeru.inoue _ gmail.com>
 
-        * release 0.0.3:
-        * samples/MyBlog
-        - returns 404 at MyBlog/Controller/Root.pm
+	* release 0.0.3:
+	* samples/MyBlog
+	- returns 404 at MyBlog/Controller/Root.pm
 	* Catalyst/Controller/Atompub/Collection.pm
 	- rewrite make_edit_uri in POD
 
 2007-09-11  Takeru INOUE  <takeru.inoue _ gmail.com>
 
-        * release 0.0.2:
-        * samples/MyAtom
-        - rename sample application to MyAtom from MyApp
+	* release 0.0.2:
+	* samples/MyAtom
+	- rename sample application to MyAtom from MyApp
 
 2007-09-10  Takeru INOUE  <takeru.inoue _ gmail.com>
 
-        * release 0.0.1: created by Module::Starter
+	* release 0.0.1: created by Module::Starter

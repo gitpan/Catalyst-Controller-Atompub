@@ -13,6 +13,7 @@ my $builder = Module::Build->new(
 
 	'Atompub' => '0.1.6',
 	'Catalyst::Runtime' => 5.7,
+	'Catalyst::Plugin::Static::Simple' => 0.16, # for samples/
         'File::Slurp' => 0,
 	'FindBin' => 0,
         'HTTP::Status' => 0,
