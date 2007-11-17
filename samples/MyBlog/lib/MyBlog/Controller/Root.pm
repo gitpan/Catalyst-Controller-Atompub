@@ -40,8 +40,7 @@ sub auto :Private {
 
 sub default : Private {
     my ( $self, $c ) = @_;
-    $c->res->status('404');
-    $c->response->body('Not Found');
+    $c->res->redirect('html');
 }
 
 =head2 end

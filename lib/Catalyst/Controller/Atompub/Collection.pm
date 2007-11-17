@@ -20,8 +20,10 @@ use base qw( Catalyst::Controller::Atompub::Base );
 __PACKAGE__->mk_accessors( qw( edited ) );
 
 my %COLLECTION_METHOD = ( GET    => '_list',
+			  HEAD   => '_list',
 			  POST   => '_create' );
 my %RESOURCE_METHOD   = ( GET    => '_read',
+			  HEAD   => '_read',
 			  POST   => '_create',
 			  PUT    => '_update',
 			  DELETE => '_delete' );
@@ -35,15 +37,21 @@ sub auto :Private {
 # access to the collection
 sub default :Private {
     my ( $self, $c ) = @_;
-    my $method = $COLLECTION_METHOD{ uc $c->req->method }
-        || $self->error( $c, RC_METHOD_NOT_ALLOWED );
+    my $method = $COLLECTION_METHOD{ uc $c->req->method };
+    if ( ! $method ) {
+	$c->res->headers->allow('GET, HEAD, POST');
+        return $self->error( $c, RC_METHOD_NOT_ALLOWED );
+    }
     $self->$method( $c );
 }
 
 sub edit_uri :LocalRegex('^([^-/][^/]*)') {
     my ( $self, $c ) = @_;
-    my $method = $RESOURCE_METHOD{ uc $c->req->method }
-        || $self->error( $c, RC_METHOD_NOT_ALLOWED );
+    my $method = $RESOURCE_METHOD{ uc $c->req->method };
+    if ( ! $method ) {
+	$c->res->headers->allow('GET, HEAD, PUT, DELETE');
+        return $self->error( $c, RC_METHOD_NOT_ALLOWED );
+    }
     $self->$method( $c );
 }
 

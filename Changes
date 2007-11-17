@@ -1,3 +1,14 @@
+2007-11-17  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.2.0:
+	* Catalyst/Controller/Atompub/Collection.pm
+	- fix a bug to respond 405 when unknown HTTP method 
+          received
+	- process HEAD requests
+	* samples/MyBlog
+	- add //link[@rel=service]
+	- redirect to /html if a path is not defined
+
 2007-10-02  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.1.8:

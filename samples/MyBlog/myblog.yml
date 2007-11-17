@@ -47,4 +47,4 @@ authentication:
         password_hash_type: MD5
     http:
         type: basic
-        realm: MyBlog
+        realm: My Blog
