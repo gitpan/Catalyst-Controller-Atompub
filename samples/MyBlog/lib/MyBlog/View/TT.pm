@@ -1,4 +1,5 @@
-package MyBlog::View::TT;
+package # hide from PAUSE
+    MyBlog::View::TT;
 
 use strict;
 use base 'Catalyst::View::TT';

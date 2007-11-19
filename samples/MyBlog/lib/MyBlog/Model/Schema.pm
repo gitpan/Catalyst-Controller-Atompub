@@ -1,4 +1,5 @@
-package MyBlog::Model::Schema;
+package # hide from PAUSE
+    MyBlog::Model::Schema;
 
 use strict;
 use base qw( DBIx::Class::Schema::Loader );

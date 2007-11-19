@@ -1,4 +1,5 @@
-package MyBlog;
+package # hide from PAUSE
+    MyBlog;
 
 use strict;
 use warnings;

@@ -1,4 +1,5 @@
-package MyBlog::Controller::Service;
+package # hide from PAUSE
+    MyBlog::Controller::Service;
 
 use strict;
 use warnings;

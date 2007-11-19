@@ -1,4 +1,5 @@
-package MyAtom;
+package	# hide from PAUSE
+    MyAtom;
 
 use strict;
 use warnings;

@@ -1,4 +1,5 @@
-package MyBlog::Controller::MediaCollection;
+package # hide from PAUSE
+    MyBlog::Controller::MediaCollection;
 
 use strict;
 use warnings;

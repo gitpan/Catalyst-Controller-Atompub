@@ -1,4 +1,5 @@
-package MyAtom::Controller::MyService;
+package # hide from PAUSE
+    MyAtom::Controller::MyService;
 
 use strict;
 use warnings;

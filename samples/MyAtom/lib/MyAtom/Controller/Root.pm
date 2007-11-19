@@ -1,4 +1,5 @@
-package MyAtom::Controller::Root;
+package # hide from PAUSE
+    MyAtom::Controller::Root;
 
 use strict;
 use warnings;

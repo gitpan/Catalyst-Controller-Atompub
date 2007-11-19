@@ -1,4 +1,5 @@
-package MyBlog::Controller::Root;
+package # hide from PAUSE
+    MyBlog::Controller::Root;
 
 use strict;
 use warnings;
@@ -26,7 +27,7 @@ sub auto :Private {
     my ( $self, $c ) = @_;
 
     # authentication not required, if GET
-    return 1 if $c->req->method eq 'GET';
+    return 1 if $c->req->method eq 'GET' || $c->req->method eq 'HEAD';
 
     my $realm = $c->config->{authentication}{http}{realm};
     $c->authorization_required( realm => $realm );

@@ -1,4 +1,5 @@
-package MyBlog::Model::DBIC;
+package # hide from PAUSE
+    MyBlog::Model::DBIC;
 
 use strict;
 use base 'Catalyst::Model::DBIC::Schema';

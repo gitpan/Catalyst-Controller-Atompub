@@ -1,4 +1,5 @@
-package MyAtom::Controller::MyCollection;
+package # hide from PAUSE
+    MyAtom::Controller::MyCollection;
 
 use strict;
 use warnings;

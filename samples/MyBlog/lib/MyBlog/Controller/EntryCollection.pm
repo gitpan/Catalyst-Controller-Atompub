@@ -1,4 +1,5 @@
-package MyBlog::Controller::EntryCollection;
+package # hide from PAUSE
+    MyBlog::Controller::EntryCollection;
 
 use strict;
 use warnings;

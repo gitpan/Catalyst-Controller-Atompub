@@ -1,6 +1,6 @@
 ---
 name: Catalyst-Controller-Atompub
-version: 0.2.0
+version: 0.2.1
 author:
   - 'Takeru INOUE <takeru.inoue _ gmail.com>'
 abstract: A Catalyst controller for the Atom Publishing Protocol
@@ -25,7 +25,7 @@ requires:
 provides:
   Catalyst::Controller::Atompub:
     file: lib/Catalyst/Controller/Atompub.pm
-    version: 0.2.0
+    version: 0.2.1
   Catalyst::Controller::Atompub::Base:
     file: lib/Catalyst/Controller/Atompub/Base.pm
   Catalyst::Controller::Atompub::Collection:

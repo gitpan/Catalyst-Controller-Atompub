@@ -1,4 +1,5 @@
-package MyAtom::Model::DBIC;
+package # hide from PAUSE
+    MyAtom::Model::DBIC;
 
 use strict;
 use base 'Catalyst::Model::DBIC::Schema';

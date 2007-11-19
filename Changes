@@ -1,3 +1,12 @@
+2007-11-19  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.2.1:
+	* samples
+	- insert line feeds at package lines to hide package name from
+	  PAUSE.
+	* samples/MyBlog
+	- don't authenticate for HEAD
+
 2007-11-17  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.2.0:
