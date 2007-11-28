@@ -1,3 +1,10 @@
+2007-11-29  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.2.2:
+	* Catalyst/Controller/Atompub/Collection
+	- unquote If-Match/If-None-Match values
+	  thanks Marumoto
+
 2007-11-19  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.2.1:

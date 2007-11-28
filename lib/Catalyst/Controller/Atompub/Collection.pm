@@ -448,6 +448,7 @@ sub _is_modified {
 	if ! defined $etag && ! $last_modified; # if don't check version
 
     my $match = $method eq 'GET' ? $c->req->if_none_match : $c->req->if_match;
+    $match =~ s/^['"](.+)['"]$/$1/; #" unquote
 
     return 1 if defined $etag && ( ! defined $match || $etag ne $match );
 
