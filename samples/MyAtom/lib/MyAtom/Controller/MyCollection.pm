@@ -5,18 +5,6 @@ use strict;
 use warnings;
 use base 'Catalyst::Controller::Atompub::Collection';
 
-=head1 NAME
-
-MyAtom::Controller::MyCollection - Catalyst Controller
-
-=head1 DESCRIPTION
-
-Catalyst Controller.
-
-=head1 METHODS
-
-=cut
-
 # List resources in a Feed Document, which must be implemented in
 # the mehtod with "Atompub(list)" attribute
 sub get_feed :Atompub(list) {
@@ -48,8 +36,8 @@ sub create_entry :Atompub(create) {
     my $uri = $self->entry_resource->uri;
 
     # app:edited element, which was assigned by C::C::Atompub,
-    # is coverted into ISO 8601 format like '2007-01-01 00:00:00'
-    my $edited = $self->edited->iso;
+    # is coverted into UNIX time
+    my $edited = $self->edited->epoch;
 
     # POSTed Entry (XML::Atom::Entry)
     my $entry = $self->entry_resource->body;
@@ -91,8 +79,8 @@ sub update_entry :Atompub(update) {
     my $uri = $c->req->uri;
 
     # app:edited element, which was assigned by C::C::Atompub,
-    # is coverted into ISO 8601 format like '2007-01-01 00:00:00'
-    my $edited = $self->edited->iso;
+    # is coverted into UNIX time
+    my $edited = $self->edited->epoch;
 
     # PUTted Entry (XML::Atom::Entry)
     my $entry = $self->entry_resource->body;
@@ -122,16 +110,5 @@ sub delete_entry :Atompub(delete) {
     # Return true on success
     return 1;
 }
-
-=head1 AUTHOR
-
-Takeru INOUE,,,
-
-=head1 LICENSE
-
-This library is free software, you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=cut
 
 1;

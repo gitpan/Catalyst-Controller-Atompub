@@ -40,32 +40,4 @@ __PACKAGE__->config( name => 'MyBlog' );
 # Start the application
 __PACKAGE__->setup;
 
-
-=head1 NAME
-
-MyBlog - Catalyst based application
-
-=head1 SYNOPSIS
-
-    script/myblog_server.pl
-
-=head1 DESCRIPTION
-
-[enter your description here]
-
-=head1 SEE ALSO
-
-L<MyBlog::Controller::Root>, L<Catalyst>
-
-=head1 AUTHOR
-
-Takeru INOUE,,,
-
-=head1 LICENSE
-
-This library is free software, you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=cut
-
 1;

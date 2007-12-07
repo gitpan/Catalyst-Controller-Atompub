@@ -63,7 +63,7 @@ sub create_resource :Atompub(create) {
     # Edit $entry if needed
 
     my $vals = {
-	edited => $self->edited->iso,
+	edited => $self->edited->epoch,
 	uri    => $uri,
 	etag   => $self->calculate_new_etag( $c, $uri ),
 	body   => $entry->as_xml,
@@ -99,7 +99,7 @@ sub update_resource :Atompub(update) {
 	|| return $self->error( $c, RC_NOT_FOUND );
 
     my $vals = {
-	edited => $self->edited->iso,
+	edited => $self->edited->epoch,
 	uri    => $uri,
 	etag   => $self->calculate_new_etag( $c, $uri ),
 	body   => $self->entry_resource->body->as_xml,

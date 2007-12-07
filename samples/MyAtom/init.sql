@@ -1,13 +1,9 @@
 DROP TABLE IF EXISTS entries;
 
 CREATE TABLE entries (
-  id		INT		AUTO_INCREMENT,
-  edited	TIMESTAMP,
-
-  uri		VARCHAR(255)	NOT NULL,
-  xml		TEXT		NOT NULL,
-
-  PRIMARY KEY(id),
+  id		INTEGER	PRIMARY KEY,
+  edited	INTEGER,
+  uri		TEXT,
+  xml		TEXT,
   UNIQUE(uri)
 );
-

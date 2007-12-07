@@ -3,43 +3,40 @@ DROP TABLE IF EXISTS medias;
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE entries (
-  id		INT		AUTO_INCREMENT,
-  edited	TIMESTAMP,
+  id		INTEGER	PRIMARY KEY,
+  edited	INTEGER,
 
-  uri		VARCHAR(255)	NOT NULL,
-  etag		VARCHAR(255),
-  body		TEXT		NOT NULL,	# XML
+  uri		TEXT,
+  etag		TEXT,
+  body		TEXT,	-- XML
 
-  PRIMARY KEY(id),
   UNIQUE(uri)
 );
 
 CREATE TABLE medias (
-  id		INT		AUTO_INCREMENT,
-  edited	TIMESTAMP,
+  id		INTEGER	PRIMARY KEY,
+  edited	INTEGER,
 
-  entry_uri	VARCHAR(255)	NOT NULL,
-  entry_etag	VARCHAR(255),
-  entry_body	TEXT		NOT NULL,	# XML
+  entry_uri	TEXT,
+  entry_etag	TEXT,
+  entry_body	TEXT,	-- XML
 
-  media_uri	VARCHAR(255)	NOT NULL,
-  media_etag	VARCHAR(255),
-  media_body	TEXT		NOT NULL,	# Base64
-  media_type	VARCHAR(32)	NOT NULL,
+  media_uri	TEXT,
+  media_etag	TEXT,
+  media_body	TEXT,	-- Base64
+  media_type	TEXT,
 
-  PRIMARY KEY(id),
   UNIQUE(entry_uri)
 );
 
 
 CREATE TABLE users (
-  id		INT		AUTO_INCREMENT,
-  created_on	TIMESTAMP,
+  id		INTEGER	PRIMARY KEY,
+  created_on	INTEGER,
 
-  username	VARCHAR(32)	NOT NULL,
-  password	VARCHAR(32)	NOT NULL,
+  username	TEXT,
+  password	TEXT,
 
-  PRIMARY KEY(id),
   UNIQUE(username)
 );
 
@@ -51,4 +48,3 @@ VALUES (
   'foo',
   'acbd18db4cc2f85cedef654fccc4a4d8'
 );
-

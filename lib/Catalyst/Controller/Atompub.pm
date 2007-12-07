@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use Carp;
 
-use version; our $VERSION = qv('0.2.2');
+use version; our $VERSION = qv('0.2.3');
 
 use Atompub 0.1.6;
 use Catalyst::Request;
@@ -93,11 +93,10 @@ The following resources are required:
     Authentication::Store::DBIC
     Authentication::Credential::HTTP
 
-=item * MySQL v4.0 or later
+=item * SQLite v3.0 or later
 
 Initialize your database with C<init.sql> before running the samples.
-The initialization script assums that database name is 'test', 
-username is 'test', and password is 'test'.
+The initialization script assums that database is C<atom.db>.
 
 =back
 

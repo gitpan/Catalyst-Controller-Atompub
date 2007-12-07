@@ -63,7 +63,7 @@ sub create_resource :Atompub(create) {
     # Edit $entry and $media if needed ...
 
     my $vals = {
-	edited     => $self->edited->iso,
+	edited     => $self->edited->epoch,
 	entry_uri  => $entry_uri,
 	entry_etag => $self->calculate_new_etag( $c, $entry_uri ),
 	entry_body => $self->media_link_entry->body->as_xml,
@@ -113,7 +113,7 @@ sub update_resource :Atompub(update) {
     my $rs = $c->model( $MODEL )->search( $cond )->first
 	|| return $self->error( $c, RC_NOT_FOUND );
 
-    my $vals = { edited => $self->edited->iso };
+    my $vals = { edited => $self->edited->epoch };
 
     if ( $rs->entry_uri eq $uri ) {
 	$vals->{entry_etag} = $self->calculate_new_etag( $c, $uri );

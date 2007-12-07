@@ -5,23 +5,6 @@ use strict;
 use warnings;
 use base 'Catalyst::Controller';
 
-=head1 NAME
-
-MyBlog::Controller::Html - Catalyst Controller
-
-=head1 DESCRIPTION
-
-Catalyst Controller.
-
-=head1 METHODS
-
-=cut
-
-
-=head2 index 
-
-=cut
-
 use Atompub::DateTime qw( datetime );
 use Atompub::MediaType qw( media_type );
 use Atompub::Util qw( is_acceptable_media_type );
@@ -83,17 +66,5 @@ sub index : Private {
 
     $c->stash->{collections} = \@colls;
 }
-
-
-=head1 AUTHOR
-
-Takeru INOUE,,,
-
-=head1 LICENSE
-
-This library is free software, you can redistribute it and/or modify
-it under the same terms as Perl itself.
-
-=cut
 
 1;
