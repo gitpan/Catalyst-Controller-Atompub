@@ -34,7 +34,7 @@ Controller::MediaCollection:
 Model::DBIC:
     schema_class: MyBlog::Model::Schema
     connect_info:
-        - dbi:SQLite:dbname=atom.db
+        - dbi:SQLite:dbname=test.db
 
 authentication:
     dbic:

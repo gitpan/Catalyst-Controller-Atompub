@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use Carp;
 
-use version; our $VERSION = qv('0.2.4');
+use version; our $VERSION = qv('0.3.0');
 
 use Atompub 0.1.6;
 use Catalyst::Request;
@@ -96,7 +96,7 @@ The following resources are required:
 =item * SQLite v3.0 or later
 
 Initialize your database with C<init.sql> before running the samples.
-The initialization script assums that database is C<atom.db>.
+The initialization script assums that database is C<test.db>.
 
 =back
 

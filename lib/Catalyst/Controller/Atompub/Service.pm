@@ -65,6 +65,10 @@ Catalyst::Controller::Atompub::Service
 
 =head1 SYNOPSIS
 
+    # Use the Catalyst helper
+    $ perl script/myatom_create.pl controller MyService Atompub::Service
+
+    # And edit lib/MyAtom/Controller/MyService.pm
     package MyAtom::Controller::MyService;
     use base 'Catalyst::Controller::Atompub::Service';
 

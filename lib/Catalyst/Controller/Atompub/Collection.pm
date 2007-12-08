@@ -11,6 +11,7 @@ use File::Slurp;
 use HTTP::Status;
 use NEXT;
 use POSIX qw( strftime );
+use Text::CSV;
 use Time::HiRes qw( gettimeofday );
 use URI::Escape;
 use XML::Atom::Entry;
@@ -466,8 +467,10 @@ sub create_action {
     my $attr = lc $args{attributes}{Atompub}[0];
     my $code =    $args{code};
 
-    if ( $attr ) {
-	$self->{handler}{ $attr } = $code;
+    my $csv = Text::CSV->new( { allow_whitespace => 1 } );
+    $csv->parse( $attr );
+    for ( $csv->fields ) {
+        $self->{handler}{ $_ } = $code if length $_;
 #        %args = (); # removes 'Loaded Private actions' message in initialization
     }
 
@@ -526,28 +529,12 @@ Catalyst::Controller::Atompub::Collection
 - A Catalyst controller for the Atom Collection Resources
 
 
-=head1 COMPATIBILITY ISSUES
-
-An accessor for I<edited> was obsoleted since v0.1.0.
-
-    package MyAtom::Controller::MyCollection;
-    use base 'Catalyst::Controller::Atompub::Collection';
-
-    sub create_entry :Atompub(create) {
-        # ...
-
-        # Old accessor (can be still used, but will be removed)
-        $self->entry_resource->edited;
-
-        # New accessor
-        $self->edited;
-
-        # ...
-    }
-
-
 =head1 SYNOPSIS
 
+    # Use the Catalyst helper
+    $ perl script/myatom_create.pl controller MyCollection Atompub::Collection
+
+    # And edit lib/MyAtom/Controller/MyCollection.pm
     package MyAtom::Controller::MyCollection;
     use base 'Catalyst::Controller::Atompub::Collection';
 

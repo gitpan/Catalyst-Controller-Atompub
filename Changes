@@ -1,5 +1,17 @@
 2007-12-08  Takeru INOUE  <takeru.inoue _ gmail.com>
 
+        * release 0.3.0:
+	* lib/Catalyst/Helper/Controller/Atompub/Collection.pm
+	  lib/Catalyst/Helper/Controller/Atompub/Service.pm
+	- new helper classes
+	* lib/Catalyst/Controller/Atompub/Collection.pm
+	- parse method attributes by using Text::CSV (multiple
+	  attributes are allowed, like ":Atompub(create, update)")
+	* Build.PL
+	- fix dependency
+
+2007-12-07  Takeru INOUE  <takeru.inoue _ gmail.com>
+
         * release 0.2.4:
 	* MANIFEST
 	- add samples/*/atom.db
@@ -14,7 +26,7 @@
 2007-11-29  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.2.2:
-	* Catalyst/Controller/Atompub/Collection
+	* lib/Catalyst/Controller/Atompub/Collection.pm
 	- unquote If-Match/If-None-Match values
 	  thanks Marumoto
 
@@ -30,7 +42,7 @@
 2007-11-17  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.2.0:
-	* Catalyst/Controller/Atompub/Collection.pm
+	* lib/Catalyst/Controller/Atompub/Collection.pm
 	- fix a bug to respond 405 when unknown HTTP method 
           received
 	- process HEAD requests
@@ -47,21 +59,21 @@
 2007-09-27  Takeru INOUE  <takeru.inoue _ gmail.com>
 
 	* release 0.1.7:
-	* Catalyst/Controller/Atompub/Collection.pm
+	* lib/Catalyst/Controller/Atompub/Collection.pm
 	- modify POD slightly
 
 2007-09-27  Takeru INOUE  <takeru.inoue _ gmail.com>
 
 	* release 0.1.6:
-	* Catalyst/Controller/Atompub/Base.pm
+	* lib/Catalyst/Controller/Atompub/Base.pm
 	- modify error handling
 
 2007-09-26  Takeru INOUE  <takeru.inoue _ gmail.com>
 
 	* release 0.1.5:
-	* Catalyst/Controller/Atompub/Service
+	* lib/Catalyst/Controller/Atompub/Service
 	- don't set Content-Type and body if already set
-	* Catalyst/Controller/Atompub/Base
+	* lib/Catalyst/Controller/Atompub/Base
 	- modify error handling
 
 2007-09-18  Takeru INOUE  <takeru.inoue _ gmail.com>
@@ -88,14 +100,14 @@
 2007-09-14  Takeru INOUE  <takeru.inoue _ gmail.com>
 
 	* release 0.1.1:
-	* Catalyst/Controller/Atompub/Collection.pm
+	* lib/Catalyst/Controller/Atompub/Collection.pm
 	- fix POD on cache control
 
 2007-09-14  Takeru INOUE  <takeru.inoue _ gmail.com>
 
 	* release 0.1.0:
 	- thanks Tim for testing
-	* Catalyst/Controller/Atompub/Collection.pm
+	* lib/Catalyst/Controller/Atompub/Collection.pm
 	- don't check If-Match on DELETE
 	- move an accessor for edited to the parent module
 	  Catalyst::Controller::Atompub::Collection
@@ -109,7 +121,7 @@
 	* release 0.0.3:
 	* samples/MyBlog
 	- returns 404 at MyBlog/Controller/Root.pm
-	* Catalyst/Controller/Atompub/Collection.pm
+	* lib/Catalyst/Controller/Atompub/Collection.pm
 	- rewrite make_edit_uri in POD
 
 2007-09-11  Takeru INOUE  <takeru.inoue _ gmail.com>

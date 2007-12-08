@@ -8,6 +8,8 @@ lib/Catalyst/Controller/Atompub.pm
 lib/Catalyst/Controller/Atompub/Base.pm
 lib/Catalyst/Controller/Atompub/Collection.pm
 lib/Catalyst/Controller/Atompub/Service.pm
+lib/Catalyst/Helper/Controller/Atompub/Collection.pm
+lib/Catalyst/Helper/Controller/Atompub/Service.pm
 t/00.load.t
 t/01.service-default.t
 t/02.service.t
@@ -22,7 +24,7 @@ samples/MyAtom/Changes
 samples/MyAtom/Makefile.PL
 samples/MyAtom/README
 samples/MyAtom/init.sql
-samples/MyAtom/atom.db
+samples/MyAtom/test.db
 samples/MyAtom/lib/MyAtom.pm
 samples/MyAtom/lib/MyAtom/Controller/MyCollection.pm
 samples/MyAtom/lib/MyAtom/Controller/MyService.pm
@@ -56,7 +58,7 @@ samples/MyBlog/Changes
 samples/MyBlog/Makefile.PL
 samples/MyBlog/README
 samples/MyBlog/init.sql
-samples/MyBlog/atom.db
+samples/MyBlog/test.db
 samples/MyBlog/lib/MyBlog.pm
 samples/MyBlog/lib/MyBlog/Controller/EntryCollection.pm
 samples/MyBlog/lib/MyBlog/Controller/Html.pm
