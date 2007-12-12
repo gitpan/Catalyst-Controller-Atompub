@@ -1,3 +1,9 @@
+2007-12-12  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.3.1:
+	* lib/Catalyst/Helper/Controller/Atompub/Base.pm
+	- fix a bug in error method
+
 2007-12-08  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.3.0:

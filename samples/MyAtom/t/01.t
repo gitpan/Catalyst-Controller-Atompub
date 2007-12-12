@@ -10,7 +10,7 @@ use FindBin;
 use HTTP::Status;
 use XML::Atom::Entry;
 
-system "sqlite3 $FindBin::Bin/../atom.db < $FindBin::Bin/../init.sql" || die;
+#system "sqlite3 $FindBin::Bin/../test.db < $FindBin::Bin/../init.sql" || die;
 
 
 my $client = Atompub::Client->new;
