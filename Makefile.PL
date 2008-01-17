@@ -8,10 +8,10 @@ WriteMakefile
           'EXE_FILES' => [],
           'VERSION_FROM' => 'lib/Catalyst/Controller/Atompub.pm',
           'PREREQ_PM' => {
-                           'Catalyst::Helper' => 0,
                            'URI::Escape' => 0,
                            'FindBin' => 0,
                            'Catalyst::Plugin::ConfigLoader' => 0,
+                           'Catalyst::Devel' => 0,
                            'Text::CSV' => 0,
                            'HTTP::Status' => 0,
                            'Test::Perl::Critic' => 0,
