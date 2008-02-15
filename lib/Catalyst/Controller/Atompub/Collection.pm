@@ -214,6 +214,9 @@ sub _create {
     else {
 	my ( $entry_uri, $media_uri ) = $self->make_edit_uri( $c, $media_type );
 
+        return $self->error( $c, RC_BAD_REQUEST, 'No body' )
+            unless $c->req->body;
+
 	my $media
 	    = read_file( $c->req->body, binmode => ':raw', err_mode => 'carp' )
 	        || return $self->error( $c, RC_BAD_REQUEST, 'No media resource' );
@@ -234,6 +237,8 @@ sub _create {
 	$content->src( $media_uri );
 	$content->type( $c->req->content_type );
 	$entry->content( $content );
+
+        $entry->summary(' ');
 
 	my $rc = Catalyst::Controller::Atompub::Collection::Resource->new;
 	$rc->edited( $self->edited ); # XXX DEPRECATED
@@ -449,7 +454,7 @@ sub _is_modified {
 	if ! defined $etag && ! $last_modified; # if don't check version
 
     my $match = $method eq 'GET' ? $c->req->if_none_match : $c->req->if_match;
-    $match =~ s/^['"](.+)['"]$/$1/; #" unquote
+    $match =~ s/^['"](.+)['"]$/$1/ if $match; #" unquote
 
     return 1 if defined $etag && ( ! defined $match || $etag ne $match );
 

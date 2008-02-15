@@ -38,7 +38,7 @@ sub index : Private {
 
 	my $uri     = $entry->edit_link;
 	my $title   = qq{<a href="$uri">} . $entry->title . '</a>';
-	my $content = $entry->content->body;
+	my $content = $entry->content ? $entry->content->body : '';
 
 	push @entries, { updated => datetime( $entry->updated )->str,
 			 title   => $title,
@@ -53,7 +53,7 @@ sub index : Private {
     while ( my $resource = $rs->next ) {
 	my $entry = XML::Atom::Entry->new( \$resource->entry_body );
 
-	my $uri     = $entry->content->src;
+	my $uri     = $entry->content ? $entry->content->src : next;
 	my $title   = qq{<a href="$uri">} . $entry->title . '</a>';
 	my $content = qq{<a href="$uri"><img src="$uri"/></a>};
 

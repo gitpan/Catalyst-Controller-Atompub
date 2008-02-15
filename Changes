@@ -1,3 +1,21 @@
+2008-02-15  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.3.3:
+	* lib/Catalyst/Helper/Controller/Atompub/Base.pm
+	- fix a bug in parsing arguments
+	* lib/Catalyst/Helper/Controller/Atompub/Collection.pm
+	- throw an error if HTTP body doesn't exist
+	- set //entry/summary in Media Link Entries
+	- add checks for some undef variables
+	* samples/MyBlog/lib/MyBlog/Controller/Html.pm
+	- add checks for some undef variables
+	* samples/MyBlog/lib/MyBlog/Controller/MediaCollection.pm
+	- overwrite //entry/content/@src and @type in Media Link
+	  Entries
+	* samples/MyBlog/t/01.t
+	- add tests for //entry/content/@src and @type in Media Link
+	  Entries
+
 2008-01-18  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.3.2:

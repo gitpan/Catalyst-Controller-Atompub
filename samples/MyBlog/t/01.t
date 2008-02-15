@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 use Data::Dumper; $Data::Dumper::Indent = 1;
-use Test::More tests => 93;
+use Test::More tests => 98;
 
 use Atompub::Client;
 use Atompub::DateTime qw( datetime );
@@ -151,6 +151,7 @@ is $entry->edit_link, 'http://localhost:3000/mediacollection/media_1.atom';
 is my $media_uri = $entry->edit_media_link, 'http://localhost:3000/mediacollection/media_1.gif';
 
 is $entry->content->src, 'http://localhost:3000/mediacollection/media_1.gif';
+is $entry->content->type, 'image/gif';
 
 ok $client->createMedia( $coll[1]->href, 't/samples/media1.gif', 'image/gif',
 			 'Media 1' ); # same slug
@@ -186,6 +187,8 @@ is $client->res->code, RC_NOT_MODIFIED;
 # Update Media Link Entry
 
 $entry->title('Media 1, ver.2');
+$entry->content->src('http://wrong.uri');
+$entry->content->type('wrong/type');
 
 ok $client->updateEntry( $uri, $entry );
 
@@ -196,6 +199,8 @@ ok media_type( $client->res->content_type )->is_a('entry');
 
 $entry = $client->rc;
 is $entry->title, 'Media 1, ver.2';
+is $entry->content->src, 'http://localhost:3000/mediacollection/media_1.gif';
+is $entry->content->type, 'image/gif';
 
 
 # Read Media Resource
@@ -214,7 +219,6 @@ is $client->res->code, RC_NOT_MODIFIED;
 
 # Update Media Resource
 
-# XXX Entry can not have app:edited, you SHOULD get it from Feed generally
 my $prev_edited = $entry->edited;
 sleep 1;
 
@@ -226,8 +230,10 @@ ok $client->res->etag;
 
 is $client->rc, read_file( 't/samples/media2.png', binmode => ':raw' );
 
-# XXX Entry can not have app:edited, you SHOULD get it from Feed generally
-ok datetime( $client->getEntry( $uri )->edited ) > datetime( $prev_edited );
+$entry = $client->getEntry($uri);
+ok datetime( $entry->edited ) > datetime( $prev_edited );
+is $entry->content->src, 'http://localhost:3000/mediacollection/media_1.gif';
+is $entry->content->type, 'image/png';
 
 
 # Delete Entry Resource

@@ -26,9 +26,10 @@ sub error {
     return if ! is_success $c->res->status && $c->res->body;
 
     my ( $status, $message )
-        = @args  > 1                                           ?  @args
-        : @args == 1 && $args[0] =~ /^(?:([1-5]\d\d)\s+)?(.+)/ ? ( $1, $2 )
-        :                                                        ();
+        = @args  > 1                                      ?  @args
+        : @args == 1 && $args[0] =~ /^([1-5]\d\d)\s*(.*)/ ? ( $1, $2 )
+        : @args == 1 && $args[0] =~ /^(.*)/               ? ( $2 )
+        :                                                   ();
 
     $status ||= RC_INTERNAL_SERVER_ERROR;
     $c->res->status( $status );

@@ -115,27 +115,34 @@ sub update_resource :Atompub(update) {
 
     my $vals = { edited => $self->edited->epoch };
 
+    my ( $media_link_entry, $media_type );
     if ( $rs->entry_uri eq $uri ) {
-	$vals->{entry_etag} = $self->calculate_new_etag( $c, $uri );
-	$vals->{entry_body} = $self->media_link_entry->body->as_xml;
+	$media_link_entry = $self->media_link_entry->body;
+        $media_type = $rs->media_type;
 
-	# Don't update the Last-Modified value of the corresponding Media Resource if you use it
+	# Don't update the Last-Modified value of the corresponding
+        # Media Resource if you use it
     }
     else {
-	# app:edited and atom:updated MUST be updated even when the cooresponding Media Resource is updated
-	my $entry = XML::Atom::Entry->new( \$rs->entry_body )
+	$media_link_entry = XML::Atom::Entry->new( \$rs->entry_body )
 	    || return $self->error( $c );
-	$entry->edited( $self->edited->w3c );
-
-	$vals->{entry_etag} = $self->calculate_new_etag( $c, $rs->entry_uri );
-	$vals->{entry_body} = $entry->as_xml;
 
 	$vals->{media_etag} = $self->calculate_new_etag( $c, $rs->media_uri );
 	$vals->{media_body} = MIME::Base64::encode( $self->media_resource->body );
-	$vals->{media_type} = $self->media_resource->type;
+	$vals->{media_type} = $media_type = $self->media_resource->type;
 
 	# Do update the Last-Modified value of the Media Resource if you use it
     }
+
+    # app:edited and atom:content in Media Link Entry MUST be updated
+    $media_link_entry->edited( $self->edited->w3c );
+    my $content = XML::Atom::Content->new;
+       $content->src( $rs->media_uri );
+       $content->type( $media_type );
+    $media_link_entry->content( $content );
+
+    $vals->{entry_body} = $media_link_entry->as_xml;
+    $vals->{entry_etag} = $self->calculate_new_etag( $c, $rs->entry_uri );
 
     $rs->update( $vals )
 	|| return $self->error( $c, RC_INTERNAL_SERVER_ERROR, "Cannot update resource: $uri" );
