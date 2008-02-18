@@ -1,3 +1,10 @@
+2008-02-19  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.3.4:
+	* lib/Catalyst/Helper/Controller/Atompub/Collection.pm
+	- remove query from URI for member resources
+	- add some characters to LocalRegex of edit_uri()
+
 2008-02-15  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.3.3:

@@ -46,7 +46,7 @@ sub default :Private {
     $self->$method( $c );
 }
 
-sub edit_uri :LocalRegex('^([^-/][^/]*)') {
+sub edit_uri :LocalRegex('^([^-/?&#][^/?&#]*)') {
     my ( $self, $c ) = @_;
     my $method = $RESOURCE_METHOD{ uc $c->req->method };
     if ( ! $method ) {
@@ -300,7 +300,7 @@ sub _read {
 
     return $c->res->status( RC_NOT_MODIFIED ) unless $self->_is_modified( $c );
 
-    my $uri = $c->req->uri;
+    my $uri = $c->req->uri->no_query;
 
     my @accepts = $self->info->get( $c, $self )->accepts;
     my $media_type = @accepts == 0 ? media_type('entry')
@@ -358,7 +358,7 @@ sub _update {
 
     $self->edited( datetime );
 
-    my $uri = $c->req->uri;
+    my $uri = $c->req->uri->no_query;
 
     my $content;
     if ( $media_type->is_a('entry') ) {
@@ -426,7 +426,7 @@ sub _delete {
 #    return $self->error( $c, RC_PRECONDITION_FAILED )
 #	if $self->_is_modified( $c );
 
-    my $uri = $c->req->uri;
+    my $uri = $c->req->uri->no_query;
 
     my $rc = Catalyst::Controller::Atompub::Collection::Resource->new;
     $rc->uri( $uri );
@@ -445,7 +445,7 @@ sub _is_modified {
 
     my $method = $c->req->method;
 
-    my %ret = $self->find_version( $c, $c->req->uri );
+    my %ret = $self->find_version( $c, $c->req->uri->no_query );
 
     my $etag          = $ret{etag};
     my $last_modified = $ret{last_modified};
@@ -481,6 +481,8 @@ sub create_action {
 
     $self->NEXT::create_action( %args );
 }
+
+sub URI::no_query { [ split /[?&]/, shift->canonical ]->[0] }
 
 package Catalyst::Controller::Atompub::Collection::Resource;
 
@@ -596,7 +598,7 @@ Catalyst::Controller::Atompub::Collection
     sub get_entry :Atompub(read) {
         my ( $self, $c ) = @_;
     
-        my $uri = $c->req->uri;
+        my $uri = $c->entry_resource->uri;
     
         # Retrieve the Entry
         my $rs = $c->model('DBIC::Entries')->find( { uri => $uri } );
@@ -614,7 +616,7 @@ Catalyst::Controller::Atompub::Collection
     sub update_entry :Atompub(update) {
         my ( $self, $c ) = @_;
     
-        my $uri = $c->req->uri;
+        my $uri = $c->entry_resource->uri;
     
         # app:edited element, which was assigned by C::C::Atompub,
         # is coverted into ISO 8601 format like '2007-01-01 00:00:00'
@@ -640,7 +642,7 @@ Catalyst::Controller::Atompub::Collection
     sub delete_entry :Atompub(delete) {
         my ( $self, $c ) = @_;
     
-        my $uri = $c->req->uri;
+        my $uri = $c->entry_resource->uri;
     
         # Delete the Entry
         $c->model('DBIC::Entries')->find( { uri => $uri } )->delete;
