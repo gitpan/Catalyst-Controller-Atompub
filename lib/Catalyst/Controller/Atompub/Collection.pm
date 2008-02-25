@@ -342,7 +342,7 @@ sub _read {
 sub _update {
     my ( $self, $c ) = @_;
 
-    return $self->error( $c, RC_PRECONDITION_FAILED )
+    return $self->error( $c, RC_PRECONDITION_FAILED, 'Missing If-match header' )
 	if $self->_is_modified( $c );
 
     my $media_type
