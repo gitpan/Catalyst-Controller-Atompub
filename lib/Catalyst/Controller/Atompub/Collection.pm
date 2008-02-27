@@ -46,7 +46,7 @@ sub default :Private {
     $self->$method( $c );
 }
 
-sub edit_uri :LocalRegex('^([^-/?&#][^/?&#]*)') {
+sub edit_uri :LocalRegex('^([^-?&#][^?&#]*)') {
     my ( $self, $c ) = @_;
     my $method = $RESOURCE_METHOD{ uc $c->req->method };
     if ( ! $method ) {

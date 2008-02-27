@@ -1,8 +1,14 @@
+2008-02-27  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.3.6:
+	* lib/Catalyst/Helper/Controller/Atompub/Collection.pm
+	- remove '/' from LocalRegex of edit_uri()
+
 2008-02-25  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.3.5:
 	* lib/Catalyst/Helper/Controller/Atompub/Collection.pm
-	- specify error message on missing If-match header
+	- specify error message on missing If-match header, thanks Keith
 
 2008-02-19  Takeru INOUE  <takeru.inoue _ gmail.com>
 
