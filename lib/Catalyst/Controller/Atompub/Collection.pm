@@ -202,8 +202,16 @@ sub _create {
 	$entry->updated( $self->edited->w3c ) unless $entry->updated;
 
 	$entry->id( $uri );
-
 	$entry->edit_link( $uri );
+
+        if (!$entry->author) {
+            $entry->author(XML::Atom::Person->new)->name('');
+        }
+        elsif (!$entry->author->name) {
+            $entry->author->name('');
+        }
+
+        $entry->title('') unless defined $entry->title;
 
 	my $rc = Catalyst::Controller::Atompub::Collection::Resource->new;
 	$rc->edited( $self->edited ); # XXX DEPRECATED
@@ -372,10 +380,17 @@ sub _update {
 	$entry->updated( $self->edited->w3c ) unless $entry->updated;
 
 	$entry->id( $uri );
-
 	$entry->edit_link( $uri );
-
 	# XXX check edit-media
+
+        if (!$entry->author) {
+            $entry->author(XML::Atom::Person->new)->name('');
+        }
+        elsif (!$entry->author->name) {
+            $entry->author->name('');
+        }
+
+        $entry->title('') unless defined $entry->title;
 
 	$content = $entry;
 
