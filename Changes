@@ -1,3 +1,15 @@
+2008-03-18  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.4.0:
+	* lib/
+	- major refactoring
+	- change coding conventions
+	* lib/Catalyst/Helper/Controller/Atompub/Collection.pm
+	- enable returning 204 (No Content) on PUT
+	- write how to change the collection URI in POD
+	* lib/Catalyst/Helper/Controller/Atompub/Base.pm
+	- use Class::Accessor::Fast instead of Class::Accessor::Lvalue::Fast
+
 2008-02-29  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.3.7:

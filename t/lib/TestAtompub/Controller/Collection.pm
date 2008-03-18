@@ -5,17 +5,17 @@ use warnings;
 
 use XML::Atom::Entry;
 
-use base qw( Catalyst::Controller::Atompub::Collection );
+use base qw(Catalyst::Controller::Atompub::Collection);
 
 sub get_feed :Atompub(list) {
-    my ( $self, $c ) = @_;
-    $self->collection_resource->body->add_entry( $self->_make_entry );
+    my($self, $c) = @_;
+    $self->collection_resource->body->add_entry($self->_make_entry);
     return $self;
 }
 
 sub get_resource :Atompub(read) {
-    my ( $self, $c ) = @_;
-    $self->entry_resource->body( $self->_make_entry );
+    my($self, $c) = @_;
+    $self->entry_resource->body($self->_make_entry);
     return $self;
 }
 

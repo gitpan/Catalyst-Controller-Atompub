@@ -2,13 +2,13 @@ package # hide from PAUSE
     MyBlog::View::TT;
 
 use strict;
-use base 'Catalyst::View::TT';
+use base qw(Catalyst::View::TT);
 
 __PACKAGE__->config({
     CATALYST_VAR => 'Catalyst',
     INCLUDE_PATH => [
-        MyBlog->path_to( 'root', 'src' ),
-        MyBlog->path_to( 'root', 'lib' )
+        MyBlog->path_to('root', 'src'),
+        MyBlog->path_to('root', 'lib')
     ],
     PRE_PROCESS  => 'config/main',
     WRAPPER      => 'site/wrapper',

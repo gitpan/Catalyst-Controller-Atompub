@@ -103,7 +103,7 @@ sub create_resource :Atompub(create) {
 
 # Search the requested Resource
 sub get_resource :Atompub(read) {
-    my( $self, $c) = @_;
+    my($self, $c) = @_;
 
     # Retrieve the Resource...
 

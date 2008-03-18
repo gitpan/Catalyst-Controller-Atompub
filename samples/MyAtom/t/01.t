@@ -4,17 +4,15 @@ use Data::Dumper; $Data::Dumper::Indent = 1;
 use Test::More tests => 38;
 
 use Atompub::Client;
-use Atompub::MediaType qw( media_type );
+use Atompub::MediaType qw(media_type);
 use File::Slurp;
 use FindBin;
 use HTTP::Status;
 use XML::Atom::Entry;
 
-#system "sqlite3 $FindBin::Bin/../test.db < $FindBin::Bin/../init.sql" || die;
-
+#system "sqlite3 $FindBin::Bin/../test.db < $FindBin::Bin/../init.sql";
 
 my $client = Atompub::Client->new;
-
 
 # Service
 
@@ -32,19 +30,18 @@ is @coll, 1;
 is $coll[0]->title, 'MyCollection';
 is $coll[0]->href, 'http://localhost:3000/mycollection';
 
-
 # Create Entry Resource
 
 my $entry = XML::Atom::Entry->new;
 $entry->title('Entry 1');
 $entry->content('This is the 1st entry');
 
-ok my $uri = $client->createEntry( $coll[0]->href, $entry, 'Entry 1' );
+ok my $uri = $client->createEntry($coll[0]->href, $entry, 'Entry 1');
 is $uri, 'http://localhost:3000/mycollection/entry_1.atom';
 
 is $client->res->code, RC_CREATED;
 is $client->res->location, 'http://localhost:3000/mycollection/entry_1.atom';
-ok media_type( $client->res->content_type )->is_a('entry');
+ok media_type($client->res->content_type)->is_a('entry');
 
 $entry = $client->rc;
 is $entry->title, 'Entry 1';
@@ -54,13 +51,12 @@ ok $entry->edited;
 ok $entry->updated;
 like $entry->content->body, qr{This is the 1st entry};
 
-
 # List Entry Resources
 
-ok my $feed = $client->getFeed( $coll[0]->href );
+ok my $feed = $client->getFeed($coll[0]->href);
 
 is $client->res->code, RC_OK;
-ok media_type( $client->res->content_type )->is_a('feed');
+ok media_type($client->res->content_type)->is_a('feed');
 
 is $feed->title, 'MyCollection';
 ok $feed->updated;
@@ -73,33 +69,30 @@ my @entries = $feed->entries;
 is @entries, 1;
 is $entries[0]->title, 'Entry 1';
 
-
 # Read Entry Resource
 
-ok $entry = $client->getEntry( $uri );
+ok $entry = $client->getEntry($uri);
 
 is $client->res->code, RC_OK;
-ok media_type( $client->res->content_type )->is_a('entry');
+ok media_type($client->res->content_type)->is_a('entry');
 
 is $entry->title, 'Entry 1';
-
 
 # Update Entry Resource
 
 $entry->title('Entry 1, ver.2');
 
-ok $client->updateEntry( $uri, $entry );
+ok $client->updateEntry($uri, $entry);
 
 is $client->res->code, RC_OK;
-ok media_type( $client->res->content_type )->is_a('entry');
+ok media_type($client->res->content_type)->is_a('entry');
 
 $entry = $client->rc;
 is $entry->title, 'Entry 1, ver.2';
 
-
 # Delete Entry Resource
 
-ok $client->deleteEntry( $uri );
+ok $client->deleteEntry($uri);
 
-ok $feed = $client->getFeed( $coll[0]->href );
-ok ! $feed->entries;
+ok $feed = $client->getFeed($coll[0]->href);
+ok !$feed->entries;

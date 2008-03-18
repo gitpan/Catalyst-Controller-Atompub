@@ -3,543 +3,491 @@ package Catalyst::Controller::Atompub::Collection;
 use strict;
 use warnings;
 
-use Atompub::DateTime qw( datetime );
-use Atompub::MediaType qw( media_type );
-use Atompub::Util qw( is_acceptable_media_type is_allowed_category );
+use Atompub::DateTime qw(datetime);
+use Atompub::MediaType qw(media_type);
+use Atompub::Util qw(is_acceptable_media_type is_allowed_category);
 use Catalyst::Utils;
 use File::Slurp;
 use HTTP::Status;
 use NEXT;
-use POSIX qw( strftime );
+use POSIX qw(strftime);
 use Text::CSV;
-use Time::HiRes qw( gettimeofday );
+use Time::HiRes qw(gettimeofday);
 use URI::Escape;
 use XML::Atom::Entry;
 
-use base qw( Catalyst::Controller::Atompub::Base );
+use base qw(Catalyst::Controller::Atompub::Base);
 
-__PACKAGE__->mk_accessors( qw( edited ) );
+__PACKAGE__->mk_accessors(qw(edited));
 
-my %COLLECTION_METHOD = ( GET    => '_list',
-			  HEAD   => '_list',
-			  POST   => '_create' );
-my %RESOURCE_METHOD   = ( GET    => '_read',
-			  HEAD   => '_read',
-			  POST   => '_create',
-			  PUT    => '_update',
-			  DELETE => '_delete' );
+my %COLLECTION_METHOD = (
+    GET    => '_list',
+    HEAD   => '_list',
+    POST   => '_create',
+);
+my %RESOURCE_METHOD = (
+    GET    => '_read',
+    HEAD   => '_read',
+    POST   => '_create',
+    PUT    => '_update',
+    DELETE => '_delete',
+);
 
 sub auto :Private {
-    my ( $self, $c ) = @_;
+    my($self, $c) = @_;
     $self->{resources} = [];
     1;
 }
 
 # access to the collection
 sub default :Private {
-    my ( $self, $c ) = @_;
+    my($self, $c) = @_;
     my $method = $COLLECTION_METHOD{ uc $c->req->method };
-    if ( ! $method ) {
-	$c->res->headers->allow('GET, HEAD, POST');
-        return $self->error( $c, RC_METHOD_NOT_ALLOWED );
+    unless ($method) {
+        $c->res->headers->allow('GET, HEAD, POST');
+        return $self->error($c, RC_METHOD_NOT_ALLOWED);
     }
-    $self->$method( $c );
+    $self->$method($c);
 }
 
 sub edit_uri :LocalRegex('^([^-?&#][^?&#]*)') {
-    my ( $self, $c ) = @_;
+    my($self, $c) = @_;
     my $method = $RESOURCE_METHOD{ uc $c->req->method };
-    if ( ! $method ) {
-	$c->res->headers->allow('GET, HEAD, PUT, DELETE');
-        return $self->error( $c, RC_METHOD_NOT_ALLOWED );
+    unless ($method) {
+        $c->res->headers->allow('GET, HEAD, PUT, DELETE');
+        return $self->error($c, RC_METHOD_NOT_ALLOWED);
     }
-    $self->$method( $c );
+    $self->$method($c);
 }
 
 sub resource {
-    my $self = shift;
-    if ( @_ ) {
-	my $rc = shift;
-	push @{ $self->{resources} }, $rc;
+    my($self, $rc) = @_;
+    if ($rc) {
+        push @{ $self->{resources} }, $rc;
     }
     else {
-	my ( $rc ) = grep { $_ } @{ $self->{resources} };
-	return $rc;
+        [ grep { $_ } @{ $self->{resources} } ]->[0];
     }
 }
 
 *rc = \&resource;
 
-my @ACCESSORS = ( [ 'collection_resource', 'feed',  'is_collection' ],
-		  [ 'entry_resource',      'entry', 'is_entry'      ],
-		  [ 'media_resource',       undef,  'is_media'      ],
-		  [ 'media_link_entry',    'entry', 'is_entry'      ] );
+my @ACCESSORS = (
+    [ 'collection_resource', 'feed',  'is_collection' ],
+    [ 'entry_resource',      'entry', 'is_entry'      ],
+    [ 'media_resource',       undef,  'is_media'      ],
+    [ 'media_link_entry',    'entry', 'is_entry'      ],
+);
 
-for my $accessor ( @ACCESSORS ) {
+for my $accessor (@ACCESSORS) {
     no strict 'refs'; ## no critic
-    my ( $method, $type, $is ) = @$accessor;
+    my($method, $type, $is) = @$accessor;
     *{$method} = sub {
-	my $self = shift;
-	if ( @_ ) {
-	    my $rc = $_[0];
-	    $rc->type( media_type( $type ) ) if $type;
-	    push @{ $self->{resources} }, $rc;
-	}
-	else {
-	    my ( $rc ) = grep { ! $_->type || $_->$is }
-	                 grep { $_ }
-	                     @{ $self->{resources} };
-	    return $rc;
-	}
+        my($self, $rc) = @_;
+        if ($rc) {
+            $rc->type(media_type($type)) if $type;
+            push @{ $self->{resources} }, $rc;
+        }
+        else {
+            return [
+                grep { !$_->type || $_->$is }
+                grep { $_ }
+                    @{ $self->{resources} }
+            ]->[0];
+        }
     };
 }
 
 sub make_edit_uri {
-    my ( $self, $c, @args ) = @_;
+    my($self, $c, @args) = @_;
 
-    my $collection_uri = $self->info->get( $c, $self )->href;
+    my $collection_uri = $self->info->get($c, $self)->href;
 
     my $basename;
-    if ( my $slug = $c->req->slug ) {
-	my $slug = uri_unescape $slug;
-	$slug =~ s/^\s+//; $slug =~ s/\s+$//; $slug =~ s/[.\s]+/_/;
-	$basename = uri_escape lc $slug;
+    if (my $slug = $c->req->slug) {
+        my $slug = uri_unescape $slug;
+        $slug =~ s/^\s+//; $slug =~ s/\s+$//; $slug =~ s/[.\s]+/_/;
+        $basename = uri_escape lc $slug;
     }
     else {
-	my ( $sec, $usec ) = gettimeofday;
-	$basename
-	    = join '-', strftime( '%Y%m%d-%H%M%S', localtime($sec) ), sprintf( '%06d', $usec );
+        my($sec, $usec) = gettimeofday;
+        $basename
+            = join '-', strftime('%Y%m%d-%H%M%S', localtime($sec)), sprintf('%06d', $usec);
     }
 
-    my @media_types = map { media_type($_) } ( 'entry', @args );
+    my @media_types = map { media_type($_) } ('entry', @args);
 
     my @uris;
-    for my $media_type ( @media_types ) {
-	my $ext  = $media_type->extension || 'bin';
-	my $name = join '.', $basename, $ext;
-	push @uris, join '/', $collection_uri, $name;
+    for my $media_type (@media_types) {
+        my $ext  = $media_type->extension || 'bin';
+        my $name = join '.', $basename, $ext;
+        push @uris, join '/', $collection_uri, $name;
     }
 
-    return wantarray ? @uris : $uris[0];
+    wantarray ? @uris : $uris[0];
 }
 
-for my $operation qw( list create read update delete ) {
+for my $operation qw(list create read update delete) {
     no strict 'refs'; ## no critic
-    *{ "do_$operation" } = sub {
-	my ( $self, $c, @args ) = @_;
-	return $self->error( $c, RC_METHOD_NOT_ALLOWED )
-	    unless UNIVERSAL::isa( $self->{handler}{ $operation }, 'CODE' );
-	$self->{handler}{ $operation }( $self, $c, @args );
+    *{"do_$operation"} = sub {
+        my($self, $c, @args) = @_;
+        return $self->error($c, RC_METHOD_NOT_ALLOWED)
+            unless UNIVERSAL::isa($self->{handler}{$operation}, 'CODE');
+        $self->{handler}{$operation}($self, $c, @args);
     };
 }
 
 sub _list {
-    my ( $self, $c ) = @_;
+    my($self, $c) = @_;
 
     my $feed = XML::Atom::Feed->new;
-    my $title = $self->info->get( $c, $self )->title;
-    $feed->title( $title );
+    my $title = $self->info->get($c, $self)->title;
+    $feed->title($title);
 
-    if ( $self->{author} ) {
+    if ($self->{author}) {
         my $author = XML::Atom::Person->new;
-	$self->{author}{$_} and $author->$_( $self->{author}{$_} )
-	    for qw( name email uri );
-        $feed->author( $author );
+        $self->{author}{$_} and $author->$_($self->{author}{$_})
+            for qw(name email uri);
+        $feed->author($author);
     }
 
-    $feed->updated( datetime->w3c );
+    $feed->updated(datetime->w3c);
 
-    my $uri = $self->info->get( $c, $self )->href;
+    my($uri) = $c->req->uri =~ m{^(https?://[^/]+/[^?&#]+)};
 
-    $feed->id( $uri );
-    $feed->self_link( $uri );
+    $feed->id($uri);
+    $feed->self_link($uri);
 
-    my $rc = Catalyst::Controller::Atompub::Collection::Resource->new;
-    $rc->uri( $uri );
-    $rc->body( $feed );
-    $self->collection_resource( $rc );
+    $self->collection_resource( Catalyst::Controller::Atompub::Collection::Resource->new({
+        uri => $uri,
+        body => $feed,
+    }) );
 
-    $self->do_list( $c )
-	|| return $self->error( $c, RC_INTERNAL_SERVER_ERROR, "Cannot list collection: $uri" );
+    $self->do_list($c)
+        or return $self->error($c, RC_INTERNAL_SERVER_ERROR, "Cannot list collection: $uri");
 
-    if ( ! $c->res->content_type ) {
-	return $self->error( $c, RC_INTERNAL_SERVER_ERROR, 'Content-Type not assigned' )
-	    if ! $self->collection_resource || ! $self->collection_resource->type;
-	$c->res->content_type( $self->collection_resource->type );
-    }
+    return unless $self->collection_resource;
 
-    return if length $c->res->body;
-
-    return $self->error( $c, RC_INTERNAL_SERVER_ERROR, 'Content body not found' )
-	if ! $self->collection_resource || ! $self->collection_resource->body;
-
-    $c->res->body( $self->collection_resource->serialize );
+    $c->res->content_type($self->collection_resource->type) unless $c->res->content_type;
+    $c->res->body($self->collection_resource->serialize) unless $c->res->body;
 }
 
 sub _create {
-    my ( $self, $c ) = @_;
+    my($self, $c) = @_;
 
     my $media_type
-	= media_type( $c->req->content_type ) || media_type('application/octet-stream');
+        = media_type($c->req->content_type) || media_type('application/octet-stream');
 
-    my $coll = $self->info->get( $c, $self );
+    my $coll = $self->info->get($c, $self);
 
-    return $self->error( $c, RC_UNSUPPORTED_MEDIA_TYPE, "Unsupported media type: $media_type" )
-	unless is_acceptable_media_type( $coll, $media_type );
+    return $self->error($c, RC_UNSUPPORTED_MEDIA_TYPE, "Unsupported media type: $media_type")
+        unless is_acceptable_media_type($coll, $media_type);
 
-    $self->edited( datetime );
+    $self->edited(datetime);
 
-    if ( $media_type->is_a('entry') ) {
-	my ( $uri ) = $self->make_edit_uri( $c );
+    if ($media_type->is_a('entry')) {
+        my($uri) = $self->make_edit_uri($c);
+        my $entry = $self->_fixup_entry($c, $uri) or return $self->error($c);
 
-	my $entry = XML::Atom::Entry->new( $c->req->body )
-	    || return $self->error( $c, RC_BAD_REQUEST, XML::Atom::Entry->errstr );
-
-	return $self->error( $c, RC_BAD_REQUEST, 'Forbidden category' )
-	    unless is_allowed_category( $coll, $entry->category );
-
-	$entry->edited( $self->edited->w3c );
-	$entry->updated( $self->edited->w3c ) unless $entry->updated;
-
-	$entry->id( $uri );
-	$entry->edit_link( $uri );
-
-        if (!$entry->author) {
-            $entry->author(XML::Atom::Person->new)->name('');
-        }
-        elsif (!$entry->author->name) {
-            $entry->author->name('');
-        }
-
-        $entry->title('') unless defined $entry->title;
-
-	my $rc = Catalyst::Controller::Atompub::Collection::Resource->new;
-	$rc->edited( $self->edited ); # XXX DEPRECATED
-	$rc->uri( $uri );
-	$rc->body( $entry );
-	$self->entry_resource( $rc );
+        $self->entry_resource( Catalyst::Controller::Atompub::Collection::Resource->new({
+            uri => $uri,
+            body => $entry,
+        }) );
     }
     else {
-	my ( $entry_uri, $media_uri ) = $self->make_edit_uri( $c, $media_type );
+        my($entry_uri, $media_uri) = $self->make_edit_uri($c, $media_type);
 
-        return $self->error( $c, RC_BAD_REQUEST, 'No body' )
-            unless $c->req->body;
+        return $self->error($c, RC_BAD_REQUEST, 'No body') unless $c->req->body;
 
-	my $media
-	    = read_file( $c->req->body, binmode => ':raw', err_mode => 'carp' )
-	        || return $self->error( $c, RC_BAD_REQUEST, 'No media resource' );
+        my $entry = $self->_create_media_link_entry($c, $entry_uri, $media_uri)
+            or return $self->error($c);
+        my $media = read_file($c->req->body, binmode => ':raw');
 
-	my $entry = XML::Atom::Entry->new;
+        $self->media_link_entry( Catalyst::Controller::Atompub::Collection::Resource->new({
+            uri => $entry_uri,
+            body => $entry,
+        }) );
 
-	$entry->edited( $self->edited->w3c );
-	$entry->updated( $self->edited->w3c ) unless $entry->updated;
-
-	my $link = XML::Atom::Link->new;
-	$link->rel('edit-media');
-	$link->href( $media_uri );
-	$entry->add_link( $link );
-
-	$entry->title( uri_unescape $c->req->slug || 'No Title' );
-
-	my $content = XML::Atom::Content->new;
-	$content->src( $media_uri );
-	$content->type( $c->req->content_type );
-	$entry->content( $content );
-
-        $entry->summary(' ');
-
-	my $rc = Catalyst::Controller::Atompub::Collection::Resource->new;
-	$rc->edited( $self->edited ); # XXX DEPRECATED
-	$rc->uri( $media_uri );
-	$rc->body( $media );
-	$rc->type( $media_type );
-	$self->media_resource( $rc );
-
-	$entry->id( $entry_uri );
-
-	$link = XML::Atom::Link->new;
-	$link->rel('edit');
-	$link->href( $entry_uri );
-	$entry->add_link( $link );
-
-	$rc = Catalyst::Controller::Atompub::Collection::Resource->new;
-	$rc->edited( $self->edited ); # XXX DEPRECATED
-	$rc->uri( $entry_uri );
-	$rc->body( $entry );
-	$self->media_link_entry( $rc );
+        $self->media_resource( Catalyst::Controller::Atompub::Collection::Resource->new({
+            uri => $media_uri,
+            body => $media,
+            type => $media_type,
+        }) );
     }
 
-    $self->do_create( $c )
-	|| return $self->error( $c, RC_INTERNAL_SERVER_ERROR,
-				'Cannot create new resource: ' . $self->info->get( $c, $self )->href  );
+    $self->do_create($c)
+        or return $self->error($c, RC_INTERNAL_SERVER_ERROR,
+                               'Cannot create new resource: '.$self->info->get($c, $self)->href);
 
-    $c->res->status( RC_CREATED );
+    $c->res->status(RC_CREATED);
 
-    if ( ! $c->res->location ) {
-	return $self->error( $c, RC_INTERNAL_SERVER_ERROR, 'Location not found' )
-	    if ! $self->entry_resource || ! $self->entry_resource->uri;
-	$c->res->location( $self->entry_resource->uri );
+    if (!defined $c->res->etag || !$c->res->last_modified) {
+        my %ret = $self->find_version($c, $self->entry_resource->uri);
+        $c->res->etag($ret{etag})
+            if !defined $c->res->etag && defined $ret{etag};
+        $c->res->last_modified($ret{last_modified})
+            if !$c->res->last_modified && $ret{last_modified};
     }
 
-    if ( ! defined $c->res->etag || ! $c->res->last_modified ) {
-	my %ret = $self->find_version( $c, $c->res->location );
-	$c->res->etag( $ret{etag} )
-	    if ! defined $c->res->etag && defined $ret{etag};
-	$c->res->last_modified( $ret{last_modified} )
-	    if ! $c->res->last_modified && $ret{last_modified};
-    }
+    return unless $self->entry_resource;
 
-    if ( ! $c->res->content_type ) {
-	return $self->error( $c, RC_INTERNAL_SERVER_ERROR, 'Content-Type not assigned' )
-	    if ! $self->entry_resource || ! $self->entry_resource->type;
-	$c->res->content_type( $self->entry_resource->type );
-    }
-
-    return if length $c->res->body;
-
-    return $self->error( $c, RC_INTERNAL_SERVER_ERROR, 'Content body not found' )
-	if ! $self->entry_resource || ! $self->entry_resource->body;
-
-    $c->res->body( $self->entry_resource->serialize );
+    $c->res->redirect($self->entry_resource->uri, RC_CREATED) unless $c->res->redirect;
+    $c->res->content_type($self->entry_resource->type) unless $c->res->content_type;
+    $c->res->body($self->entry_resource->serialize) unless $c->res->body;
 }
 
 sub _read {
-    my ( $self, $c ) = @_;
+    my($self, $c) = @_;
 
-    return $c->res->status( RC_NOT_MODIFIED ) unless $self->_is_modified( $c );
+    return $c->res->status(RC_NOT_MODIFIED) unless $self->_is_modified($c);
 
     my $uri = $c->req->uri->no_query;
 
-    my @accepts = $self->info->get( $c, $self )->accepts;
-    my $media_type = @accepts == 0 ? media_type('entry')
-	           : @accepts == 1 ? media_type( $accepts[0] )
-		   :                 undef;
+    my @accepts = $self->info->get($c, $self)->accepts;
+    my $media_type
+        = @accepts == 0                        ? media_type('entry')
+        : @accepts == 1 && $accepts[0] !~ /\*/ ? media_type($accepts[0])
+        :                                        undef;
 
-    my $rc = Catalyst::Controller::Atompub::Collection::Resource->new;
-    $rc->uri( $uri );
-    $rc->type( $media_type );
-    $self->rc( $rc );
+    $self->rc( Catalyst::Controller::Atompub::Collection::Resource->new({
+        uri => $uri,
+        type => $media_type,
+    }) );
 
-    $self->do_read( $c )
-	|| return $self->error( $c, RC_INTERNAL_SERVER_ERROR, "Cannot read resource: $uri" );
+    $self->do_read($c)
+        or return $self->error( $c, RC_INTERNAL_SERVER_ERROR, "Cannot read resource: $uri" );
 
-    if ( ! defined $c->res->etag || ! $c->res->last_modified ) {
-	my %ret = $self->find_version( $c, $uri );
-	$c->res->etag( $ret{etag} )
-	    if ! defined $c->res->etag && defined $ret{etag};
-	$c->res->last_modified( $ret{last_modified} )
-	    if ! $c->res->last_modified && $ret{last_modified};
+    if (!defined $c->res->etag || !$c->res->last_modified) {
+        my %ret = $self->find_version($c, $uri);
+        $c->res->etag($ret{etag})
+            if !defined $c->res->etag && defined $ret{etag};
+        $c->res->last_modified($ret{last_modified})
+            if !$c->res->last_modified && $ret{last_modified};
     }
 
-    if ( ! $c->res->content_type ) {
-	$self->rc->type( media_type('entry') )
-	    if UNIVERSAL::isa( $self->rc->body, 'XML::Atom::Entry' );
-	return $self->error( $c, RC_INTERNAL_SERVER_ERROR, 'Content-Type not assigned' )
-	    if ! $self->rc || ! $self->rc->type;
-	$c->res->content_type( $self->rc->type );
-    }
+    return unless $self->rc;
 
-    return if length $c->res->body;
+    $c->res->content_type($self->rc->type) unless $c->res->content_type;
 
-    return $self->error( $c, RC_INTERNAL_SERVER_ERROR, 'Content body not found' ) 
-	if ! $self->rc || ! $self->rc->body;
+    return if $c->req->method eq 'HEAD';
 
-    $c->res->body( $self->rc->serialize );
+    $c->res->body($self->rc->serialize) unless $c->res->body;
 }
 
 sub _update {
-    my ( $self, $c ) = @_;
+    my($self, $c) = @_;
 
-    return $self->error( $c, RC_PRECONDITION_FAILED, 'Missing If-match header' )
-	if $self->_is_modified( $c );
+    return $self->error($c, RC_PRECONDITION_FAILED, 'Missing If-match header')
+        if $self->_is_modified($c);
 
     my $media_type
-	= media_type( $c->req->content_type ) || media_type('application/octet-stream');
+        = media_type($c->req->content_type) || media_type('application/octet-stream');
 
-    my $coll = $self->info->get( $c, $self );
+    my $coll = $self->info->get($c, $self);
 
-    return $self->error( $c, RC_UNSUPPORTED_MEDIA_TYPE, "Unsupported media type: $media_type" )
-	if    ! is_acceptable_media_type( $coll, $media_type )
-	   && ! $media_type->is_a('entry');
-              # XXX Entries are okay, this is because Media Link Entries can be PUT
-              #     even to the Media Resource Collection
+    return $self->error($c, RC_UNSUPPORTED_MEDIA_TYPE, "Unsupported media type: $media_type")
+        if !is_acceptable_media_type($coll, $media_type) && !$media_type->is_a('entry');
 
-    $self->edited( datetime );
+    $self->edited(datetime);
 
     my $uri = $c->req->uri->no_query;
 
-    my $content;
-    if ( $media_type->is_a('entry') ) {
-	my $entry = XML::Atom::Entry->new( $c->req->body )
-	    || return $self->error( $c, RC_BAD_REQUEST, XML::Atom::Entry->errstr );
-
-	return $self->error( $c, RC_BAD_REQUEST, 'Forbidden category' )
-	    unless is_allowed_category( $coll, $entry->category );
-
-	$entry->edited( $self->edited->w3c );
-	$entry->updated( $self->edited->w3c ) unless $entry->updated;
-
-	$entry->id( $uri );
-	$entry->edit_link( $uri );
-	# XXX check edit-media
-
-        if (!$entry->author) {
-            $entry->author(XML::Atom::Person->new)->name('');
-        }
-        elsif (!$entry->author->name) {
-            $entry->author->name('');
-        }
-
-        $entry->title('') unless defined $entry->title;
-
-	$content = $entry;
-
-	$media_type = media_type('entry');
+    my $body;
+    if ($media_type->is_a('entry')) {
+        $media_type = media_type('entry');
+        $body = $self->_fixup_entry($c, $uri) or return $self->error($c);
     }
     else {
-	$content
-	    = read_file( $c->req->body, binmode => ':raw', err_mode => 'carp' )
-	        || return $self->error( $c, RC_BAD_REQUEST, 'No media' );
+        return $self->error($c, RC_BAD_REQUEST, 'No body') unless $c->req->body;
+        $body = read_file($c->req->body, binmode => ':raw');
     }
 
-    my $rc = Catalyst::Controller::Atompub::Collection::Resource->new;
-    $rc->edited( $self->edited ); # XXX DEPRECATED
-    $rc->uri( $uri );
-    $rc->body( $content );
-    $rc->type( $media_type );
-    $self->rc( $rc );
+    $self->rc( Catalyst::Controller::Atompub::Collection::Resource->new({
+        uri => $uri,
+        body => $body,
+        type => $media_type,
+    }) );
 
-    $self->do_update( $c )
-	|| return $self->error( $c, RC_INTERNAL_SERVER_ERROR, "Cannot update resource: $uri" );
+    $self->do_update($c)
+        or return $self->error($c, RC_INTERNAL_SERVER_ERROR, "Cannot update resource: $uri");
 
-    if ( ! defined $c->res->etag || ! $c->res->last_modified ) {
-	my %ret = $self->find_version( $c, $uri );
-	$c->res->etag( $ret{etag} )
-	    if ! defined $c->res->etag && defined $ret{etag};
-	$c->res->last_modified( $ret{last_modified} )
-	    if ! $c->res->last_modified && $ret{last_modified};
+    if (!defined $c->res->etag || !$c->res->last_modified) {
+        my %ret = $self->find_version($c, $uri);
+        $c->res->etag($ret{etag})
+            if !defined $c->res->etag && defined $ret{etag};
+        $c->res->last_modified($ret{last_modified})
+            if !$c->res->last_modified && $ret{last_modified};
     }
 
-    if ( ! $c->res->content_type ) {
-	return $self->error( $c, RC_INTERNAL_SERVER_ERROR, 'Content-Type not assigned' )
-	    if ! $self->rc || ! $self->rc->type;
-	$c->res->content_type( $self->rc->type );
-    }
+    return unless $self->rc;
+    return if $c->res->status eq RC_NO_CONTENT;
 
-    return if length $c->res->body;
-
-    return $self->error( $c, RC_INTERNAL_SERVER_ERROR, 'Content body not found' )
-	if ! $self->rc || ! $self->rc->body;
-
-    $c->res->body( $self->rc->serialize );
+    $c->res->content_type($self->rc->type) unless $c->res->content_type;
+    $c->res->body($self->rc->serialize) unless $c->res->body;
 }
 
 sub _delete {
-    my ( $self, $c ) = @_;
+    my($self, $c) = @_;
 
 # If-Match nor If-Unmodified-Since header is not required on DELETE
-#    return $self->error( $c, RC_PRECONDITION_FAILED )
-#	if $self->_is_modified( $c );
+#    return $self->error($c, RC_PRECONDITION_FAILED)
+#       if $self->_is_modified($c);
 
     my $uri = $c->req->uri->no_query;
 
-    my $rc = Catalyst::Controller::Atompub::Collection::Resource->new;
-    $rc->uri( $uri );
-    $self->rc( $rc );
+    $self->rc( Catalyst::Controller::Atompub::Collection::Resource->new({
+        uri => $uri,
+    }) );
 
-    $c->res->status( RC_NO_CONTENT );
+    $c->res->status(RC_NO_CONTENT);
 
-    $self->do_delete( $c )
-	|| return $self->error( $c, RC_INTERNAL_SERVER_ERROR, "Cannot delete resource: $uri" );
+    $self->do_delete($c)
+        or return $self->error($c, RC_INTERNAL_SERVER_ERROR, "Cannot delete resource: $uri");
 }
 
-sub find_version { }
+sub find_version {}
 
 sub _is_modified {
-    my ( $self, $c ) = @_;
+    my($self, $c) = @_;
 
     my $method = $c->req->method;
 
-    my %ret = $self->find_version( $c, $c->req->uri->no_query );
+    my %ret = $self->find_version($c, $c->req->uri->no_query);
 
     my $etag          = $ret{etag};
     my $last_modified = $ret{last_modified};
 
     return $method eq 'GET' ? 1 : 0
-	if ! defined $etag && ! $last_modified; # if don't check version
+        if !defined $etag && !$last_modified; # if don't check version
 
     my $match = $method eq 'GET' ? $c->req->if_none_match : $c->req->if_match;
     $match =~ s/^['"](.+)['"]$/$1/ if $match; #" unquote
 
-    return 1 if defined $etag && ( ! defined $match || $etag ne $match );
+    return 1 if defined $etag && (!defined $match || $etag ne $match);
 
     my $since = $method eq 'GET' ? $c->req->if_modified_since : $c->req->if_unmodified_since;
 
-    return 1 if $last_modified && ( ! $since || datetime( $last_modified ) != datetime( $since ) );
+    return 1 if $last_modified && (!$since || datetime($last_modified) != datetime($since));
 
     return 0;
 }
 
+sub _fixup_entry {
+    my($self, $c, $uri) = @_;
+
+    my $entry = XML::Atom::Entry->new($c->req->body)
+        or return $self->error($c, RC_BAD_REQUEST, XML::Atom::Entry->errstr);
+
+    return $self->error($c, RC_BAD_REQUEST, 'Forbidden category')
+        unless is_allowed_category($self->info->get($c, $self), $entry->category);
+
+    $entry->edited($self->edited->w3c);
+    $entry->updated($self->edited->w3c) unless $entry->updated;
+
+    $entry->id($uri);
+    $entry->edit_link($uri);
+    # XXX check edit-media link
+
+    if (!$entry->author) {
+        my $author = XML::Atom::Person->new;
+        $author->name('');
+        $entry->author($author);
+    }
+    elsif (!$entry->author->name) {
+        $entry->author->name('');
+    }
+
+    $entry->title('') unless defined $entry->title;
+
+    $entry;
+}
+
+sub _create_media_link_entry {
+    my($self, $c, $entry_uri, $media_uri) = @_;
+
+    my $entry = XML::Atom::Entry->new;
+
+    $entry->edited($self->edited->w3c);
+    $entry->updated($self->edited->w3c) unless $entry->updated;
+
+    my $link = XML::Atom::Link->new;
+    $link->rel('edit-media');
+    $link->href($media_uri);
+    $entry->add_link($link);
+
+    $link = XML::Atom::Link->new;
+    $link->rel('edit');
+    $link->href($entry_uri);
+    $entry->add_link($link);
+
+    $entry->id($entry_uri);
+
+    $entry->title(uri_unescape $c->req->slug || '');
+
+    my $content = XML::Atom::Content->new;
+    $content->src($media_uri);
+    $content->type($c->req->content_type);
+    $entry->content($content);
+
+    $entry->summary('');
+
+    $entry;
+}
+
 sub create_action {
-    my $self = shift;
-    my %args = @_; # namespace, name, reverse, class, attributes, code
+    my($self, %args) = @_; # %args: namespace, name, reverse, class, attributes, code
 
     my $attr = lc $args{attributes}{Atompub}[0];
     my $code =    $args{code};
 
-    my $csv = Text::CSV->new( { allow_whitespace => 1 } );
-    $csv->parse( $attr );
-    for ( $csv->fields ) {
-        $self->{handler}{ $_ } = $code if length $_;
+    my $csv = Text::CSV->new({ allow_whitespace => 1 });
+    $csv->parse($attr);
+    for ($csv->fields) {
+        $self->{handler}{$_} = $code if length $_;
 #        %args = (); # removes 'Loaded Private actions' message in initialization
     }
 
-    $self->NEXT::create_action( %args );
+    $self->NEXT::create_action(%args);
 }
 
 sub URI::no_query { [ split /[?&]/, shift->canonical ]->[0] }
 
 package Catalyst::Controller::Atompub::Collection::Resource;
 
-use Atompub::MediaType qw( media_type );
+use Atompub::MediaType qw(media_type);
 
-use base qw( Class::Accessor::Fast );
+use base qw(Class::Accessor::Fast);
 
-__PACKAGE__->mk_accessors( qw( uri type body ) );
+__PACKAGE__->mk_accessors(qw(uri type body));
 
-sub edited {
-    my $self = shift;
-    if (@_) {
-	$self->{edited} = $_[0];
-    }
-    else {
-	warn '$collection->$resource->edited is DEPRECATED, and see $collection->edited';
-	return $self->{edited};
-    }
+sub new {
+    my($class, $args) = @_;
+    $args ||= {};
+    bless $args, $class;
 }
 
 sub is_collection {
-    my $self = shift;
-    my $media_type = media_type( $self->type ) || return;
+    my($self) = @_;
+    my $media_type = media_type($self->type) or return;
     return $media_type->is_a('feed');
 }
 
 sub is_entry {
-    my $self = shift;
-    my $media_type = media_type( $self->type ) || return;
+    my($self) = @_;
+    my $media_type = media_type($self->type) or return;
     return $media_type->is_a('entry');
 }
 
 sub is_media {
-    my $self = shift;
-    my $media_type = media_type( $self->type ) || return;
-    return ! $media_type->is_a('application/atom+xml');
+    my($self) = @_;
+    my $media_type = media_type($self->type) or return;
+    return !$media_type->is_a('application/atom+xml');
 }
 
 sub serialize {
-    my $self = shift;
+    my($self) = @_;
     my $body = $self->body;
-    UNIVERSAL::can( $body, 'as_xml' ) ? $body->as_xml : $body;
+    UNIVERSAL::can($body, 'as_xml') ? $body->as_xml : $body;
 }
 
 1;
@@ -563,109 +511,109 @@ Catalyst::Controller::Atompub::Collection
     # List resources in a Feed Document, which must be implemented in
     # the mehtod with "Atompub(list)" attribute
     sub get_feed :Atompub(list) {
-        my ( $self, $c ) = @_;
-    
-        # Skeleton of the Feed (XML::Atom::Feed) was prepared by 
+        my($self, $c) = @_;
+
+        # Skeleton of the Feed (XML::Atom::Feed) was prepared by
         # C::C::Atompub
         my $feed = $self->collection_resource->body;
-    
+
         # Retrieve Entries sorted in descending order
-        my $rs = $c->model('DBIC::Entries')
-                   ->search( {}, { order_by => 'edited desc' } );
-    
+        my $rs = $c->model('DBIC::Entries')->search({}, {
+            order_by => 'edited desc',
+        });
+
         # Add Entries to the Feed
-        while ( my $entry_resource = $rs->next ) {
-            my $entry = XML::Atom::Entry->new( \$entry_resource->xml );
-            $feed->add_entry( $entry );
+        while (my $entry_resource = $rs->next) {
+            my $entry = XML::Atom::Entry->new(\$entry_resource->xml);
+            $feed->add_entry($entry);
         }
-    
+
         # Return true on success
-        return 1;
+        1;
     }
-    
+
     # Create new Entry in the method with "Atompub(create)" attribute
     sub create_entry :Atompub(create) {
-        my ( $self, $c ) = @_;
-    
+        my($self, $c) = @_;
+
         # URI of the new Entry, which was determined by C::C::Atompub
         my $uri = $self->entry_resource->uri;
-    
+
         # app:edited element, which was assigned by C::C::Atompub,
         # is coverted into ISO 8601 format like '2007-01-01 00:00:00'
         my $edited = $self->edited->iso;
 
         # POSTed Entry (XML::Atom::Entry)
         my $entry = $self->entry_resource->body;
-    
+
         # Create new Entry
-        $c->model('DBIC::Entries')->create( {
+        $c->model('DBIC::Entries')->create({
             uri    => $uri,
             edited => $edited,
             xml    => $entry->as_xml,
-        } );
-    
+        });
+
         # Return true on success
-        return 1;
+        1;
     }
-    
+
     # Search the requested Entry in the method with "Atompub(read)"
     # attribute
     sub get_entry :Atompub(read) {
-        my ( $self, $c ) = @_;
-    
+        my($self, $c) = @_;
+
         my $uri = $c->entry_resource->uri;
-    
+
         # Retrieve the Entry
-        my $rs = $c->model('DBIC::Entries')->find( { uri => $uri } );
-    
+        my $rs = $c->model('DBIC::Entries')->find({ uri => $uri });
+
         # Set the Entry
-        my $entry = XML::Atom::Entry->new( \$rs->xml );
-        $self->entry_resource->body( $entry );
-    
+        my $entry = XML::Atom::Entry->new(\$rs->xml);
+        $self->entry_resource->body($entry);
+
         # Return true on success
-        return 1;
+        1;
     }
-    
+
     # Update the requested Entry in the method with "Atompub(update)"
     # attribute
     sub update_entry :Atompub(update) {
-        my ( $self, $c ) = @_;
-    
+        my($self, $c) = @_;
+
         my $uri = $c->entry_resource->uri;
-    
+
         # app:edited element, which was assigned by C::C::Atompub,
         # is coverted into ISO 8601 format like '2007-01-01 00:00:00'
         my $edited = $self->edited->iso;
 
         # PUTted Entry (XML::Atom::Entry)
         my $entry = $self->entry_resource->body;
-    
+
         # Update the Entry
-        $c->model('DBIC::Entries')->find( { uri => $uri } )
-                                  ->update( {
-                                      uri => $uri,
-                                      edited => $edited,
-                                      xml => $entry->as_xml,
-                                  } );
-    
+        $c->model('DBIC::Entries')->find({ uri => $uri })->update({
+            uri => $uri,
+            edited => $edited,
+            xml => $entry->as_xml,
+        });
+
         # Return true on success
-        return 1;
+        1;
     }
-    
+
     # Delete the requested Entry in the method with "Atompub(delete)"
     # attribute
     sub delete_entry :Atompub(delete) {
-        my ( $self, $c ) = @_;
-    
+        my($self, $c) = @_;
+
         my $uri = $c->entry_resource->uri;
-    
+
         # Delete the Entry
-        $c->model('DBIC::Entries')->find( { uri => $uri } )->delete;
-    
+        $c->model('DBIC::Entries')->find({ uri => $uri })->delete;
+
         # Return true on success
-        return 1;
+        1;
     }
-        
+
     # Access to http://localhost:3000/mycollection and get Feed Document
 
 
@@ -678,29 +626,29 @@ Catalyst::Controller::Atompub::Collection provides the following features:
 =item * Pre-processing requests
 
 L<Catalyst::Controller::Atompub::Collection> pre-processes the HTTP requests.
-All you have to do is just writing CRUD operations in the subroutines 
+All you have to do is just writing CRUD operations in the subroutines
 with I<Atompub> attribute.
 
 =item * Media Resource support
 
 Media Resources (binary data) as well as Entry Resources are supported.
-A Media Link Entry, which has an I<atom:link> element to the newly created Media Resource, 
+A Media Link Entry, which has an I<atom:link> element to the newly created Media Resource,
 is given by L<Catalyst::Controller::Atompub::Collection>.
 
 =item * Media type check
 
-L<Catalyst::Controller::Atompub::Collection> checks a media type of 
+L<Catalyst::Controller::Atompub::Collection> checks a media type of
 the POSTed/PUTted resource based on collection configuration.
 
 =item * Category check
 
-L<Catalyst::Controller::Atompub::Collection> checks 
+L<Catalyst::Controller::Atompub::Collection> checks
 I<atom:category> elements in the POSTed/PUTted Entry Document
 based on collection configuration.
 
 =item * Cache controll and versioning
 
-Cache controll and versioning are enabled just by overriding C<find_version> method, 
+Cache controll and versioning are enabled just by overriding C<find_version> method,
 which returns I<ETag> and/or I<Last-Modified> header.
 
 =item * Naming resources by I<Slug> header
@@ -773,7 +721,7 @@ New Entry (L<XML::Atom::Entry>)
 
 =item * In Collections with Media Resources
 
-The implementation is expected to insert new Media Link Entry as well as new Media Resource 
+The implementation is expected to insert new Media Link Entry as well as new Media Resource
 to your model, such as L<DBIx::Class>.
 
 The following accessors can be used for the Media Resource.
@@ -970,21 +918,21 @@ Returns true on success, false otherwise.
 The following methods can be overridden to change the default behaviors.
 
 
-=head2 $controller->find_version( $uri )
+=head2 $controller->find_version($uri)
 
 By overriding C<find_version> method, cache control and versioning are enabled.
 
-The implementation is expected to return I<ETag> and/or I<Last-Modified> value 
+The implementation is expected to return I<ETag> and/or I<Last-Modified> value
 of the requested URI:
 
     package MyAtom::Controller::MyCollection;
 
     sub find_version {
-        my ( $self, $c, $uri ) = @_;
+        my($self, $c, $uri) = @_;
 
         # Retrieve ETag and/or Last-Modified of $uri
 
-        return ( etag => $etag, last_modified => $last_modified );
+        return (etag => $etag, last_modified => $last_modified);
     }
 
 When a resource of the URI does not exist, the implementation must return an empty array.
@@ -995,19 +943,19 @@ The behavior of Atompub server will be changed in the following manner:
 
 =item * On GET request
 
-Status code of 304 (Not Modified) will be returned, 
+Status code of 304 (Not Modified) will be returned,
 if the requested resource has not been changed.
 
 =item * On PUT request
 
-Status code of 412 (Precondition Failed) will be returned, 
+Status code of 412 (Precondition Failed) will be returned,
 if the current version of the resource that a client is modifying is not
 the same as the version that the client is basing its modifications on.
 
 =back
 
 
-=head2 $controller->make_edit_uri( $c, [ @args ]);
+=head2 $controller->make_edit_uri($c, [@args])
 
 By default, if the I<Slug> header is "Entry 1", the resource URI will be like:
 
@@ -1018,9 +966,9 @@ This default behavior can be changed by overriding C<find_version> method:
     package MyAtom::Controller::MyCollection;
 
     sub make_edit_uri {
-        my ( $self, $c, @args ) = @_;
+        my($self, $c, @args) = @_;
 
-        my @uris = $self->SUPER::make_edit_uri( $c, @args );
+        my @uris = $self->SUPER::make_edit_uri($c, @args);
 
         # Modify @uris as you like
 
@@ -1030,17 +978,40 @@ This default behavior can be changed by overriding C<find_version> method:
 Arguments @args are media types of POSTed resources.
 
 This method returns an array of resource URIs;
-the first element is a URI of the Entry Resource (including Media Link Entry), 
+the first element is a URI of the Entry Resource (including Media Link Entry),
 and the second one is a URI of the Media Resource if exists.
 
 
-=head2 $controller->do_list 
+=head2 $controller->default($c)
 
-=head2 $controller->do_create 
+=head2 $controller->edit_uri($c)
 
-=head2 $controller->do_read 
+The collection URI can be changed,
+by overriding C<default> and C<edit_uri> methods and modify the attributes.
 
-=head2 $controller->do_update 
+In the following example, the collection URI is changed like /mycollection/<userID>
+by overriding C<default> and C<edit_uri> methods.
+The new parameter <userID> can be obtained by $c->req->captures->[0] .
+
+    package MyAtom::Controller::MyCollection;
+
+    sub default :LocalRegex('^(\w+)$') {
+        my ($self, $c) = @_;
+        $self->NEXT::default($c);
+    }
+
+    sub edit_uri :LocalRegex('^(\w+)/(\w+)$') {
+        my ($self, $c) = @_;
+        $self->NEXT::edit_uri($c);
+    }
+
+=head2 $controller->do_list
+
+=head2 $controller->do_create
+
+=head2 $controller->do_read
+
+=head2 $controller->do_update
 
 =head2 $controller->do_delete
 
@@ -1083,17 +1054,13 @@ An accessor for a app:edited, which is applied for the POSTed/PUTted Entry Resou
 
 =head2 $controller->auto
 
-=head2 $controller->default
+=head2 $controller->_list
 
-=head2 $controller->edit_uri
+=head2 $controller->_create
 
-=head2 $controller->_list 
+=head2 $controller->_read
 
-=head2 $controller->_create 
-
-=head2 $controller->_read 
-
-=head2 $controller->_update 
+=head2 $controller->_update
 
 =head2 $controller->_delete
 
@@ -1110,7 +1077,7 @@ Paging mechanism should be implemented in a method with "Atompub(list)" attribut
 
 =head1 CONFIGURATION
 
-By default (no configuration), Collections accept Entry Documents 
+By default (no configuration), Collections accept Entry Documents
 (application/atom+xml) and any I<atom:category> element.
 
 Acceptable I<atom:category> elements can be set like:

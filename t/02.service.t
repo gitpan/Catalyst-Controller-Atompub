@@ -8,30 +8,28 @@ use lib "$FindBin::Bin/lib";
 
 use Test::WWW::Mechanize::Catalyst 'TestAtompub';
 
-use Atompub::MediaType qw( media_type );
+use Atompub::MediaType qw(media_type);
 use XML::Atom::Service;
 
 TestAtompub->config->{'Controller::Service'} = {
-    workspace => [ {
-	title => 'My Blog',
-	collection => [ qw( Controller::Collection ) ],
-    } ]
+    workspace => [{
+        title => 'My Blog',
+        collection => [qw(Controller::Collection)],
+    }]
 };
 
 TestAtompub->config->{'Controller::Collection'} = {
     collection => {
-	title => 'Diary',
-	categories => [ {
-	    fixed => 'yes',
-	    scheme => 'http://example.com/cats/big3',
-	    category => [ { term => 'animal',
-			    label => 'animal' },
-			  { term => 'vegetable',
-			    label => 'vegetable' },
-			  { term => 'mineral',
-			    scheme => 'http://example.com/dogs/big3',
-			    label => 'mineral' } ],
-	} ],
+        title => 'Diary',
+        categories => [{
+            fixed => 'yes',
+            scheme => 'http://example.com/cats/big3',
+            category => [
+                { term => 'animal', label => 'animal' },
+                { term => 'vegetable', label => 'vegetable' },
+                { term => 'mineral', scheme => 'http://example.com/dogs/big3', label => 'mineral' },
+            ],
+        }],
     }
 };
 
@@ -39,9 +37,9 @@ my $mech = Test::WWW::Mechanize::Catalyst->new;
 
 $mech->get_ok('/service');
 
-ok media_type( $mech->res->content_type )->is_a('service');
+ok media_type($mech->res->content_type)->is_a('service');
 
-my $serv = XML::Atom::Service->new( \$mech->res->content );
+my $serv = XML::Atom::Service->new(\$mech->res->content);
 isa_ok $serv, 'XML::Atom::Service';
 
 my @work = $serv->workspaces;

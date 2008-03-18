@@ -4,33 +4,33 @@ use warnings;
 use strict;
 use Carp;
 
-use version; our $VERSION = qv('0.3.7');
+use version; our $VERSION = qv('0.4.0');
 
 use Atompub 0.1.6;
 use Catalyst::Request;
 use Catalyst::Response;
 
-while ( my ( $method, $header ) = each %Atompub::REQUEST_HEADERS ) {
+while (my($method, $header) = each %Atompub::REQUEST_HEADERS) {
     no strict 'refs'; ## no critic
-    if ( ! Catalyst::Request->can( $method ) ) {
-	*{ "Catalyst::Request::$method" } = sub { shift->header( $header, @_ ) };
+    unless (Catalyst::Request->can($method)) {
+        *{"Catalyst::Request::$method"} = sub { shift->header($header, @_) };
     }
 }
 
-while ( my ( $method, $header ) = each %Atompub::RESPONSE_HEADERS ) {
+while (my($method, $header) = each %Atompub::RESPONSE_HEADERS) {
     no strict 'refs'; ## no critic
-    if ( ! Catalyst::Response->can( $method ) ) {
-	*{ "Catalyst::Response::$method" } = sub { shift->header( $header, @_ ) };
+    unless (Catalyst::Response->can($method)) {
+        *{"Catalyst::Response::$method"} = sub { shift->header($header, @_) };
     }
 }
 
-while ( my ( $method, $header ) = each %Atompub::ENTITY_HEADERS ) {
+while (my($method, $header) = each %Atompub::ENTITY_HEADERS) {
     no strict 'refs'; ## no critic
-    if ( ! Catalyst::Request->can( $method ) ) {
-	*{ "Catalyst::Request::$method" } = sub { shift->header( $header, @_ ) };
+    unless (Catalyst::Request->can($method)) {
+        *{"Catalyst::Request::$method"} = sub { shift->header($header, @_) };
     }
-    if ( ! Catalyst::Response->can( $method ) ) {
-	*{ "Catalyst::Response::$method" } = sub { shift->header( $header, @_ ) };
+    unless (Catalyst::Response->can($method)) {
+        *{"Catalyst::Response::$method"} = sub { shift->header($header, @_) };
     }
 }
 
@@ -39,16 +39,16 @@ __END__
 
 =head1 NAME
 
-Catalyst::Controller::Atompub 
+Catalyst::Controller::Atompub
 - A Catalyst controller for the Atom Publishing Protocol
 
 
 =head1 DESCRIPTION
 
-L<Catalyst::Controller::Atompub> provides a base class 
+L<Catalyst::Controller::Atompub> provides a base class
 for the Atom Publishing Protocol servers.
 This module handles all core server processing based on the Atom Publishing Protocol
-described at L<http://www.ietf.org/internet-drafts/draft-ietf-atompub-protocol-17.txt>.
+described at L<http://www.ietf.org/rfc/rfc5023.txt>.
 
 Implementations must subclass the following modules.
 
@@ -66,12 +66,13 @@ Publishes and edits resources in the collection.
 
 At first, install sample C<samples/MyAtom> in L<SAMPLES> and read controller classes.
 The code is explained in
-L<Catalyst::Controller::Atompub::Service> and 
+L<Catalyst::Controller::Atompub::Service> and
 L<Catalyst::Controller::Atompub::Collection>.
 
-L<Catalyst::Controller::Atompub> was tested in InteropTokyo2007
-L<http://intertwingly.net/wiki/pie/July2007InteropTokyo>, 
+This module was tested in July2007InteropTokyo and November2007Interop,
 and interoperated with other implementations.
+See L<http://intertwingly.net/wiki/pie/July2007InteropTokyo> and
+L<http://www.intertwingly.net/wiki/pie/November2007Interop> in detail.
 
 
 =head1 SAMPLES
@@ -116,7 +117,7 @@ This sample is a kind of tutorial.
 =head2 samples/MyBlog
 
 This sample implements many features of the Atom Publishing Protocol.
-It has two collections; one collection contains Entry Resources, 
+It has two collections; one collection contains Entry Resources,
 the other contains Media Resources (images).
 The server provides basic authentication, cache controll and feed paging.
 Duplicate detection of resource names is also implemented.

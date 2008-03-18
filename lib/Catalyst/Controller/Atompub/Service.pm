@@ -3,55 +3,56 @@ package Catalyst::Controller::Atompub::Service;
 use strict;
 use warnings;
 
-use Atompub::MediaType qw( media_type );
+use Atompub::MediaType qw(media_type);
 use XML::Atom::Service;
 
-use base qw( Catalyst::Controller::Atompub::Base );
+use base qw(Catalyst::Controller::Atompub::Base);
 
-__PACKAGE__->mk_accessors( qw( service ) );
+__PACKAGE__->mk_accessors(qw(service));
 
 sub default :Private {
-    my ( $self, $c ) = @_;
+    my($self, $c) = @_;
 
-    $self->{service} ||= $self->_make_service( $c );
-    $self->{service}   = $self->modify_service( $c, $self->service )
-	|| $self->error( $c );
+    $self->{service} ||= $self->_make_service($c);
+    $self->{service}   = $self->modify_service($c, $self->service)
+        or return $self->error($c);
 
-    $c->res->content_type( media_type('service') )
-	unless $c->res->content_type;
+    $c->res->content_type(media_type('service')) unless $c->res->content_type;
 
-    $c->res->body( $self->service->as_xml ) unless length $c->res->body;
+    $c->res->body($self->service->as_xml) unless length $c->res->body;
 }
 
 sub modify_service {
-    my ( $self, $c, $serv ) = @_;
+    my($self, $c, $serv) = @_;
     return $serv;
 }
 
 sub _make_service {
-    my ( $self, $c ) = @_;
+    my($self, $c) = @_;
 
     my $serv = XML::Atom::Service->new;
 
-    my $suffix = Catalyst::Utils::class2classsuffix( ref $self );
+    my $suffix = Catalyst::Utils::class2classsuffix(ref $self);
 
     my @configs = @{ $c->config->{$suffix}{workspace} || [] };
-    if ( ! @configs ) {
-	my @colls = grep { $self->info->get( $c, $_ ) } keys %{ $c->components };
-	@configs = ( { title      => Catalyst::Utils::class2appclass( $self ),
-		       collection => \@colls } );
+    unless (@configs) {
+        my @colls = grep { $self->info->get($c, $_) } keys %{ $c->components };
+        @configs = ({
+            title      => Catalyst::Utils::class2appclass($self),
+            collection => \@colls,
+        });
     }
 
-    for my $config ( @configs ) {
-	my $work = XML::Atom::Workspace->new;
-	$work->title( $config->{title} );
-	$work->add_collection($_) for grep { defined $_ }
-	                               map { $self->info->get( $c, $_ ) }
-	                                  @{ $config->{collection} || [] };
-	$serv->add_workspace( $work );
+    for my $config (@configs) {
+        my $work = XML::Atom::Workspace->new;
+        $work->title($config->{title});
+        $work->add_collection($_) for grep { defined $_ }
+                                       map { $self->info->get($c, $_) }
+                                          @{ $config->{collection} || [] };
+        $serv->add_workspace($work);
     }
 
-    return $serv;
+    $serv;
 }
 
 1;
@@ -97,9 +98,9 @@ The following methods can be overridden to change the default behaviors.
 By overriding C<modify_service>, modifies the default Service Documents:
 
     sub modify_service {
-        my ( $self, $c, $service ) = @_;
+        my($self, $c, $service) = @_;
 
-        # Edit $service (XML::Atom::Service) if you'd like to modify the 
+        # Edit $service (XML::Atom::Service) if you'd like to modify the
         # Service Document
 
         return $service;
@@ -122,7 +123,7 @@ An accessor for a Service Document.
 
 =head1 CONFIGURATION
 
-By default (no configuration), this module provides a Service Document 
+By default (no configuration), this module provides a Service Document
 with a single I<atom:workspace>.
 The order of I<atom:collection>s is not defined.
 

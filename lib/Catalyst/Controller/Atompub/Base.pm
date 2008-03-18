@@ -3,55 +3,55 @@ package Catalyst::Controller::Atompub::Base;
 use strict;
 use warnings;
 
-use Atompub::DateTime qw( datetime );
-use Atompub::MediaType qw( media_type );
+use Atompub::DateTime qw(datetime);
+use Atompub::MediaType qw(media_type);
 use Catalyst::Controller::Atompub;
 use HTTP::Status;
 use NEXT;
 
-use base qw( Catalyst::Controller );
+use base qw(Catalyst::Controller);
 
-__PACKAGE__->mk_accessors( qw( info ) );
+__PACKAGE__->mk_accessors(qw(info));
 
 sub new {
-    my $class = shift;
-    my $self = $class->NEXT::new(@_);
-    $self->info( Catalyst::Controller::Atompub::Info->instance( $self ) );
+    my($class, @args) = @_;
+    my $self = $class->NEXT::new(@args);
+    $self->info( Catalyst::Controller::Atompub::Info->instance($self) );
     $self;
 }
 
 sub error {
-    my ( $self, $c, @args ) = @_;
+    my($self, $c, @args) = @_;
 
     return if ! is_success $c->res->status && $c->res->body;
 
-    my ( $status, $message )
+    my($status, $message)
         = @args  > 1                                      ?  @args
-        : @args == 1 && $args[0] =~ /^([1-5]\d\d)\s*(.*)/ ? ( $1, $2 )
-        : @args == 1 && $args[0] =~ /^(.*)/               ? ( $2 )
+        : @args == 1 && $args[0] =~ /^([1-5]\d\d)\s*(.*)/ ? ($1, $2)
+        : @args == 1 && $args[0] =~ /^(.*)/               ? ($2)
         :                                                   ();
 
     $status ||= RC_INTERNAL_SERVER_ERROR;
-    $c->res->status( $status );
+    $c->res->status($status);
 
-    $message ||= status_message( $status );
+    $message ||= status_message($status);
     my $report = "$status $message";
 
     my $entry = XML::Atom::Entry->new;
 
     my $link = XML::Atom::Link->new;
     $link->rel('related'); # XXX via?
-    $link->href( $c->req->uri );
-    $entry->add_link( $link );
+    $link->href($c->req->uri);
+    $entry->add_link($link);
 
-    $entry->updated( datetime->w3c );
-    $entry->title( $report );
-    $entry->content( $report ); # XXX @type=text is better
+    $entry->updated(datetime->w3c);
+    $entry->title($report);
+    $entry->content($report); # XXX @type=text is better
 
-    $c->res->body( $entry->as_xml );
-    $c->res->content_type( media_type('entry') );
+    $c->res->body($entry->as_xml);
+    $c->res->content_type(media_type('entry'));
 
-    $c->log->error( $report );
+    $c->log->error($report);
 
     return;
 }
@@ -63,78 +63,78 @@ use warnings;
 
 use Catalyst::Utils;
 use XML::Atom::Service;
-use base qw( Class::Accessor::Lvalue::Fast );
+use base qw(Class::Accessor::Fast);
 
-__PACKAGE__->mk_accessors( qw( appclass ) );
+__PACKAGE__->mk_accessors(qw(appclass));
 
 my $Info;
 
 sub instance {
-    my $class = shift;
-    $Info ||= bless { appclass => Catalyst::Utils::class2appclass( shift ) }, $class;
+    my($class, $arg) = @_;
+    $Info ||= bless { appclass => Catalyst::Utils::class2appclass($arg) }, $class;
     $Info;
 }
 
-sub get { 
-    my ( $self, $c, $class ) = @_;
-    return unless $class = $self->_fullclass( $c, $class );
-    return unless $self->_is_collection( $c, $class );
-    $self->{info}{$class} ||= $self->_make_collection( $c, $class );
+sub get {
+    my($self, $c, $class) = @_;
+    return unless $class = $self->_fullclass($c, $class);
+    return unless $self->_is_collection($c, $class);
+    $self->{info}{$class} ||= $self->_make_collection($c, $class);
 }
 
 sub _fullclass {
-    my ( $self, $c, $class ) = @_;
+    my($self, $c, $class) = @_;
     $class = ref $class || $class || return;
     my $appclass = $self->appclass;
-    return $class =~ /^$appclass\::/ ? $class : join( '::', $appclass, $class  );
+    $class =~ /^$appclass\::/ ? $class : join('::', $appclass, $class );
 }
 
 sub _is_collection {
-    my ( $self, $c, $class ) = @_;
-    return UNIVERSAL::isa $class, 'Catalyst::Controller::Atompub::Collection';
+    my($self, $c, $class) = @_;
+    UNIVERSAL::isa $class, 'Catalyst::Controller::Atompub::Collection';
 }
 
 sub _make_collection {
-    my ( $self, $c, $class ) = @_;
+    my($self, $c, $class) = @_;
 
-    my $suffix = Catalyst::Utils::class2classsuffix( $class );
+    my $suffix = Catalyst::Utils::class2classsuffix($class);
 
     my $config = $c->config->{$suffix}{collection};
 
     my $coll = XML::Atom::Collection->new;
-    $coll->href( $self->_make_href( $c, $class ) );
-    $coll->title( $config->{title} || $class =~ /Controller::(.+)/ );
-    $coll->accept( @{ $config->{accept} } ) if $config->{accept};
+    $coll->href($self->_make_href($c, $class));
+    $coll->title($config->{title} || $class =~ /Controller::(.+)/);
+    $coll->accept(@{ $config->{accept} }) if $config->{accept};
 
-    $coll->add_categories( $self->_make_categories( $c, $_ ) )
-	for @{ $config->{categories} };
+    $coll->add_categories($self->_make_categories($c, $_))
+        for @{ $config->{categories} };
 
-    return $coll;
+    $coll;
 }
 
 sub _make_href {
-    my ( $self, $c, $class ) = @_;
-    return unless $class = $self->_fullclass( $c, $class );
-    return $c->req->base . $class->action_namespace( $c );
+    my($self, $c, $class) = @_;
+    return unless $class = $self->_fullclass($c, $class);
+    $c->req->base.$class->action_namespace($c);
 }
 
 sub _make_categories {
-    my ( $self, $c, $config ) = @_;
+    my($self, $c, $config) = @_;
 
     my $cats = XML::Atom::Categories->new;
-    $cats->href( $config->{href} ) if $config->{href};
-    $cats->fixed( $config->{fixed} ) if $config->{fixed};
-    $cats->scheme( $config->{scheme} ) if $config->{scheme};
+    $cats->href($config->{href}) if $config->{href};
+    $cats->fixed($config->{fixed}) if $config->{fixed};
+    $cats->scheme($config->{scheme}) if $config->{scheme};
 
     my @cat = map { my $cat = XML::Atom::Category->new;
-		    $cat->term( $_->{term} );
-		    $cat->scheme( $_->{scheme} ) if $_->{scheme};
-		    $cat->label( $_->{label} ) if $_->{label};
-		    $cat }
+                    $cat->term($_->{term});
+                    $cat->scheme($_->{scheme}) if $_->{scheme};
+                    $cat->label($_->{label}) if $_->{label};
+                    $cat }
                  @{ $config->{category} };
-    $cats->category( @cat );
+    $cats->category(@cat);
 
-    return $cats;
+    $cats;
 }
 
 1;
@@ -163,7 +163,7 @@ L<Catalyst::Controller::Atompub::Collection>.
 An accessor for Collection information object.
 
 
-=head2 $controller->error( $c, [ $status, $message ] )
+=head2 $controller->error($c, [$status, $message])
 
 Sets an Entry Document containing error message in $c->response->body,
 and returns C<undef>.
@@ -176,9 +176,9 @@ See L<ERROR HANDLING>.
 When something wrong happens, return with calling $controller->error method like:
 
     sub foo {
-        my ( $controller ,$c ) = @_;
+        my ($controller ,$c) = @_;
 
-        return $controller->error( $c, 404, "Entry does not exist" )
+        return $controller->error($c, 404, "Entry does not exist")
             if is_something_wrong;
     }
 
@@ -190,7 +190,7 @@ Then, Atompub server responds with an Entry Document including error message:
     <?xml version="1.0" encoding="UTF-8"?>
     <entry xmlns="http://www.w3.org/2005/Atom">
      <updated>2007-01-01T00:00:00Z</updated>
-     <link rel="related" 
+     <link rel="related"
            href="http://localhost:3000/mycollection/entry_1.atom"/>
      <title>404 Entry does not exist</title>
      <content type="xhtml">

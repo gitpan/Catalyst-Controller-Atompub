@@ -3,7 +3,7 @@ package # hide from PAUSE
 
 use strict;
 use warnings;
-use base 'Catalyst::Controller';
+use base qw(Catalyst::Controller);
 
 #
 # Sets the actions in this controller to be registered with no prefix
@@ -12,19 +12,19 @@ use base 'Catalyst::Controller';
 __PACKAGE__->config->{namespace} = '';
 
 sub auto :Private {
-    my ( $self, $c ) = @_;
+    my($self, $c) = @_;
 
     # authentication not required, if GET
     return 1 if $c->req->method eq 'GET' || $c->req->method eq 'HEAD';
 
     my $realm = $c->config->{authentication}{http}{realm};
-    $c->authorization_required( realm => $realm );
+    $c->authorization_required(realm => $realm);
 
-    return 1;
+    1;
 }
 
 sub default : Private {
-    my ( $self, $c ) = @_;
+    my($self, $c) = @_;
     $c->res->redirect('html');
 }
 

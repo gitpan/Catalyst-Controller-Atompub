@@ -2,7 +2,7 @@ package # hide from PAUSE
     MyAtom::Model::DBIC;
 
 use strict;
-use base 'Catalyst::Model::DBIC::Schema';
+use base qw(Catalyst::Model::DBIC::Schema);
 
 __PACKAGE__->config(
     schema_class => 'MyAtom::Model::Schema',
