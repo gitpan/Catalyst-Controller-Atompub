@@ -45,7 +45,7 @@ ok media_type($client->res->content_type)->is_a('entry');
 
 $entry = $client->rc;
 is $entry->title, 'Entry 1';
-is $entry->id, 'http://localhost:3000/mycollection/entry_1.atom';
+like $entry->id, qr{tag:localhost,\d{4}-\d\d-\d\d:/mycollection/entry_1.atom};
 is $entry->link->href, 'http://localhost:3000/mycollection/entry_1.atom';
 ok $entry->edited;
 ok $entry->updated;
@@ -60,7 +60,7 @@ ok media_type($client->res->content_type)->is_a('feed');
 
 is $feed->title, 'MyCollection';
 ok $feed->updated;
-is $feed->id, 'http://localhost:3000/mycollection';
+like $feed->id, qr{tag:localhost,\d{4}-\d\d-\d\d:/mycollection};
 
 is $feed->link->rel, 'self';
 is $feed->link->href, 'http://localhost:3000/mycollection';

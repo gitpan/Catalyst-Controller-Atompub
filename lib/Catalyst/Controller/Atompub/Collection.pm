@@ -13,6 +13,7 @@ use NEXT;
 use POSIX qw(strftime);
 use Text::CSV;
 use Time::HiRes qw(gettimeofday);
+use URI;
 use URI::Escape;
 use XML::Atom::Entry;
 
@@ -155,7 +156,7 @@ sub _list {
 
     my($uri) = $c->req->uri =~ m{^(https?://[^/]+/[^?&#]+)};
 
-    $feed->id($uri);
+    $feed->id(_make_id($uri));
     $feed->self_link($uri);
 
     $self->collection_resource( Catalyst::Controller::Atompub::Collection::Resource->new({
@@ -384,7 +385,7 @@ sub _fixup_entry {
     $entry->edited($self->edited->w3c);
     $entry->updated($self->edited->w3c) unless $entry->updated;
 
-    $entry->id($uri);
+    $entry->id(_make_id($uri)) unless $entry->id;
     $entry->edit_link($uri);
     # XXX check edit-media link
 
@@ -400,6 +401,15 @@ sub _fixup_entry {
     $entry->title('') unless defined $entry->title;
 
     $entry;
+}
+
+sub _make_id {
+    my($uri) = @_;
+    my $uri = URI->new($uri);
+    my $path = $uri->path;
+    $path =~ s{#}{/}g;
+    my $dt = datetime->dt;
+    'tag:'.$uri->host.','.$dt->ymd.':'.$path;
 }
 
 sub _create_media_link_entry {

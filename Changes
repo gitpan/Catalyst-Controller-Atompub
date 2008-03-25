@@ -1,3 +1,10 @@
+2008-03-25  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.4.1:
+	* lib/Catalyst/Helper/Controller/Atompub/Collection.pm
+	- change //id format like tag:diveintomark.org,2004-05-27:/archives/2004/05/27/howto-atom-linkblog
+	- set //entry/id only if id is not defined
+
 2008-03-18  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.4.0:
