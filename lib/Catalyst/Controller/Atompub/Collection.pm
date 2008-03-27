@@ -405,11 +405,11 @@ sub _fixup_entry {
 
 sub _make_id {
     my($uri) = @_;
-    my $uri = URI->new($uri);
+    $uri = URI->new($uri);
     my $path = $uri->path;
     $path =~ s{#}{/}g;
     my $dt = datetime->dt;
-    'tag:'.$uri->host.','.$dt->ymd.':'.$path;
+    'tag:'.$uri->authority.','.$dt->ymd.':'.$path;
 }
 
 sub _create_media_link_entry {
