@@ -1,3 +1,9 @@
+2008-04-03  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.4.3:
+	* lib/Catalyst/Helper/Controller/Atompub/Collection.pm
+	- revert /feed/id format to URI
+
 2008-03-27  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.4.2:

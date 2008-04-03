@@ -1,60 +1,28 @@
----
-name: Catalyst-Controller-Atompub
-version: 0.4.2
-author:
-  - 'Takeru INOUE <takeru.inoue _ gmail.com>'
-abstract: A Catalyst controller for the Atom Publishing Protocol
-license: perl
-resources:
-  license: http://dev.perl.org/licenses/
-requires:
-  Atompub: 0.1.6
-  Catalyst::Devel: 0
-  Catalyst::Plugin::ConfigLoader: 0
-  Catalyst::Runtime: 5.7
-  File::Slurp: 0
-  FindBin: 0
-  HTTP::Status: 0
-  MIME::Base64: 0
-  POSIX: 0
-  Text::CSV: 0
-  Time::HiRes: 0
-  URI::Escape: 0
-  version: 0
-build_requires:
-  Test::More: 0
-  Test::Perl::Critic: 0
-  Test::WWW::Mechanize::Catalyst: 0
-recommends:
-  Catalyst::Action::RenderView: 0
-  Catalyst::Devel: 0
-  Catalyst::Model::DBIC::Schema: 0
-  Catalyst::Plugin::Authentication::Credential::HTTP: 0
-  Catalyst::Plugin::Authentication::Store::DBIC: 0
-  Catalyst::Plugin::Static::Simple: 0.16
-  Catalyst::View::TT: 0
-  DBD::SQLite: 1.13
-  DBIx::Class::Schema::Loader: 0
-  String::CamelCase: 0
-provides:
-  Catalyst::Controller::Atompub:
-    file: lib/Catalyst/Controller/Atompub.pm
-    version: 0.4.2
-  Catalyst::Controller::Atompub::Base:
-    file: lib/Catalyst/Controller/Atompub/Base.pm
-  Catalyst::Controller::Atompub::Collection:
-    file: lib/Catalyst/Controller/Atompub/Collection.pm
-  Catalyst::Controller::Atompub::Collection::Resource:
-    file: lib/Catalyst/Controller/Atompub/Collection.pm
-  Catalyst::Controller::Atompub::Info:
-    file: lib/Catalyst/Controller/Atompub/Base.pm
-  Catalyst::Controller::Atompub::Service:
-    file: lib/Catalyst/Controller/Atompub/Service.pm
-  Catalyst::Helper::Controller::Atompub::Collection:
-    file: lib/Catalyst/Helper/Controller/Atompub/Collection.pm
-  Catalyst::Helper::Controller::Atompub::Service:
-    file: lib/Catalyst/Helper/Controller/Atompub/Service.pm
-generated_by: Module::Build version 0.2808
+--- #YAML:1.0
+name:                Catalyst-Controller-Atompub
+version:             v0.4.3
+abstract:            ~
+license:             ~
+author:              ~
+generated_by:        ExtUtils::MakeMaker version 6.42
+distribution_type:   module
+requires:     
+    Atompub:                       0.1.6
+    Catalyst::Devel:               0
+    Catalyst::Plugin::ConfigLoader: 0
+    Catalyst::Runtime:             5.7
+    File::Slurp:                   0
+    FindBin:                       0
+    HTTP::Status:                  0
+    MIME::Base64:                  0
+    POSIX:                         0
+    Test::More:                    0
+    Test::Perl::Critic:            0
+    Test::WWW::Mechanize::Catalyst: 0
+    Text::CSV:                     0
+    Time::HiRes:                   0
+    URI::Escape:                   0
+    version:                       0
 meta-spec:
-  url: http://module-build.sourceforge.net/META-spec-v1.2.html
-  version: 1.2
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3

@@ -156,7 +156,7 @@ sub _list {
 
     my($uri) = $c->req->uri =~ m{^(https?://[^/]+/[^?&#]+)};
 
-    $feed->id(_make_id($uri));
+    $feed->id($uri);
     $feed->self_link($uri);
 
     $self->collection_resource( Catalyst::Controller::Atompub::Collection::Resource->new({

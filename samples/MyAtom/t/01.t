@@ -60,7 +60,7 @@ ok media_type($client->res->content_type)->is_a('feed');
 
 is $feed->title, 'MyCollection';
 ok $feed->updated;
-like $feed->id, qr{tag:localhost:3000,\d{4}-\d\d-\d\d:/mycollection};
+is $feed->id, 'http://localhost:3000/mycollection';
 
 is $feed->link->rel, 'self';
 is $feed->link->href, 'http://localhost:3000/mycollection';

@@ -22,7 +22,7 @@ isa_ok $feed, 'XML::Atom::Feed';
 
 is $feed->title, 'Collection';
 ok $feed->updated;
-like $feed->id, qr{tag:localhost,\d{4}-\d\d-\d\d:/collection};
+is $feed->id, 'http://localhost/collection';
 
 is $feed->link->rel, 'self';
 is $feed->link->href, 'http://localhost/collection';
