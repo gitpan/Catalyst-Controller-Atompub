@@ -45,7 +45,7 @@ sub default :Private {
     my($self, $c) = @_;
     my $method = $COLLECTION_METHOD{ uc $c->req->method };
     unless ($method) {
-        $c->res->headers->allow('GET, HEAD, POST');
+        $c->res->headers->header(Allow => 'GET, HEAD, POST');
         return $self->error($c, RC_METHOD_NOT_ALLOWED);
     }
     $self->$method($c);
@@ -55,7 +55,7 @@ sub edit_uri :LocalRegex('^([^-?&#][^?&#]*)') {
     my($self, $c) = @_;
     my $method = $RESOURCE_METHOD{ uc $c->req->method };
     unless ($method) {
-        $c->res->headers->allow('GET, HEAD, PUT, DELETE');
+        $c->res->headers->header(Allow => 'GET, HEAD, PUT, DELETE');
         return $self->error($c, RC_METHOD_NOT_ALLOWED);
     }
     $self->$method($c);
@@ -97,6 +97,12 @@ for my $accessor (@ACCESSORS) {
             ]->[0];
         }
     };
+}
+
+sub make_collection_uri {
+    my($self, $c) = @_;
+    my $class = ref $self || $self;
+    $c->req->base.$class->action_namespace($c);
 }
 
 sub make_edit_uri {
@@ -154,8 +160,7 @@ sub _list {
 
     $feed->updated(datetime->w3c);
 
-    my($uri) = $c->req->uri =~ m{^(https?://[^/]+/[^?&#]+)};
-
+    my $uri = $self->make_collection_uri($c);
     $feed->id($uri);
     $feed->self_link($uri);
 
@@ -187,38 +192,42 @@ sub _create {
     $self->edited(datetime);
 
     if ($media_type->is_a('entry')) {
-        my($uri) = $self->make_edit_uri($c);
-        my $entry = $self->_fixup_entry($c, $uri) or return $self->error($c);
+        my $entry = $self->_fixup_entry($c) or return $self->error($c);
 
         $self->entry_resource( Catalyst::Controller::Atompub::Collection::Resource->new({
-            uri => $uri,
             body => $entry,
         }) );
+
+        my ($uri) = $self->make_edit_uri($c) or return $self->error($c);
+        $entry = $self->_assign_uri_for_entry($c, $entry, $uri) or return $self->error($c);
+
+        $self->entry_resource->uri($uri);
     }
     else {
-        my($entry_uri, $media_uri) = $self->make_edit_uri($c, $media_type);
-
-        return $self->error($c, RC_BAD_REQUEST, 'No body') unless $c->req->body;
-
-        my $entry = $self->_create_media_link_entry($c, $entry_uri, $media_uri)
-            or return $self->error($c);
+        my $entry = $self->_create_media_link_entry($c) or return $self->error($c);
         my $media = read_file($c->req->body, binmode => ':raw');
 
         $self->media_link_entry( Catalyst::Controller::Atompub::Collection::Resource->new({
-            uri => $entry_uri,
             body => $entry,
         }) );
 
         $self->media_resource( Catalyst::Controller::Atompub::Collection::Resource->new({
-            uri => $media_uri,
             body => $media,
             type => $media_type,
         }) );
+
+        my($entry_uri, $media_uri) = $self->make_edit_uri($c, $media_type) or return $self->error($c);
+        $entry = $self->_assign_uri_for_entry($c, $entry, $entry_uri, $media_uri) or return $self->error($c);
+
+        $self->media_link_entry->uri($entry_uri);
+        $self->media_resource->uri($media_uri);
+
+        return $self->error($c, RC_BAD_REQUEST, 'No body') unless $c->req->body;
     }
 
     $self->do_create($c)
         or return $self->error($c, RC_INTERNAL_SERVER_ERROR,
-                               'Cannot create new resource: '.$self->info->get($c, $self)->href);
+                               'Cannot create new resource: '.$self->make_collection_uri($c));
 
     $c->res->status(RC_CREATED);
 
@@ -296,7 +305,8 @@ sub _update {
     my $body;
     if ($media_type->is_a('entry')) {
         $media_type = media_type('entry');
-        $body = $self->_fixup_entry($c, $uri) or return $self->error($c);
+        $body = $self->_fixup_entry($c) or return $self->error($c);
+        $body = $self->_assign_uri_for_entry($c, $body, $uri) or return $self->error($c);
     }
     else {
         return $self->error($c, RC_BAD_REQUEST, 'No body') unless $c->req->body;
@@ -374,7 +384,7 @@ sub _is_modified {
 }
 
 sub _fixup_entry {
-    my($self, $c, $uri) = @_;
+    my($self, $c) = @_;
 
     my $entry = XML::Atom::Entry->new($c->req->body)
         or return $self->error($c, RC_BAD_REQUEST, XML::Atom::Entry->errstr);
@@ -384,10 +394,6 @@ sub _fixup_entry {
 
     $entry->edited($self->edited->w3c);
     $entry->updated($self->edited->w3c) unless $entry->updated;
-
-    $entry->id(_make_id($uri)) unless $entry->id;
-    $entry->edit_link($uri);
-    # XXX check edit-media link
 
     if (!$entry->author) {
         my $author = XML::Atom::Person->new;
@@ -403,6 +409,22 @@ sub _fixup_entry {
     $entry;
 }
 
+sub _assign_uri_for_entry {
+    my($self, $c, $entry, $entry_uri, $media_uri) = @_;
+    $entry->id(_make_id($entry_uri)) unless $entry->id;
+    $entry->edit_link($entry_uri);
+    if ($media_uri) {
+        $entry->edit_media_link($media_uri);
+        unless ($entry->content) {
+            my $content = XML::Atom::Content->new;
+            $content->src($media_uri);
+            $content->type($c->req->content_type);
+            $entry->content($content);
+        }
+    }
+    $entry;
+}
+
 sub _make_id {
     my($uri) = @_;
     $uri = URI->new($uri);
@@ -413,34 +435,12 @@ sub _make_id {
 }
 
 sub _create_media_link_entry {
-    my($self, $c, $entry_uri, $media_uri) = @_;
-
+    my($self, $c) = @_;
     my $entry = XML::Atom::Entry->new;
-
     $entry->edited($self->edited->w3c);
     $entry->updated($self->edited->w3c) unless $entry->updated;
-
-    my $link = XML::Atom::Link->new;
-    $link->rel('edit-media');
-    $link->href($media_uri);
-    $entry->add_link($link);
-
-    $link = XML::Atom::Link->new;
-    $link->rel('edit');
-    $link->href($entry_uri);
-    $entry->add_link($link);
-
-    $entry->id($entry_uri);
-
     $entry->title(uri_unescape $c->req->slug || '');
-
-    my $content = XML::Atom::Content->new;
-    $content->src($media_uri);
-    $content->type($c->req->content_type);
-    $entry->content($content);
-
     $entry->summary('');
-
     $entry;
 }
 
@@ -996,23 +996,37 @@ and the second one is a URI of the Media Resource if exists.
 
 =head2 $controller->edit_uri($c)
 
+=head2 $controller->make_collection_uri($c)
+
 The collection URI can be changed,
 by overriding C<default> and C<edit_uri> methods and modify the attributes.
 
-In the following example, the collection URI is changed like /mycollection/<userID>
+In the following example, the collection URI is changed like /mycollection/<username>
 by overriding C<default> and C<edit_uri> methods.
-The new parameter <userID> can be obtained by $c->req->captures->[0] .
+The new parameter <username> is obtained by $c->req->captures->[0] in the collection,
+or $c->user->username in the service document.
+
+Override C<make_collection_uri> method, if collection URI has to be changed.
+
+See samples/OurBlogs in details.
 
     package MyAtom::Controller::MyCollection;
 
     sub default :LocalRegex('^(\w+)$') {
-        my ($self, $c) = @_;
+        my($self, $c) = @_;
         $self->NEXT::default($c);
     }
 
-    sub edit_uri :LocalRegex('^(\w+)/(\w+)$') {
-        my ($self, $c) = @_;
+    sub edit_uri :LocalRegex('^(\w+)/([.\w]+)$') {
+        my($self, $c) = @_;
         $self->NEXT::edit_uri($c);
+    }
+
+    sub make_collection_uri {
+        my($self, $c) = @_;
+        my $class = ref $self || $self;
+        $class->NEXT::make_collection_uri($c).'/'
+            .(ref $c->controller eq $class ? $c->req->captures->[0] : $c->user->username);
     }
 
 =head2 $controller->do_list

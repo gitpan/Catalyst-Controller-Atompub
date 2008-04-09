@@ -128,6 +128,9 @@ sub delete_resource :Atompub(delete) {
 sub make_edit_uri {
     my($self, $c, @args) = @_;
 
+    # comment out to getting entry resource
+    #my $entry = $self->entry_resource->body;
+
     my @uris = $self->SUPER::make_edit_uri($c, @args);
 
     # return, if $uris[0] is not used

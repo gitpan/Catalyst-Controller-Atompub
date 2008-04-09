@@ -1,3 +1,19 @@
+2008-04-10  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.5.0:
+	* samples/OurBlogs
+	- show how to change collection URIs
+	* lib/Catalyst/Helper/Controller/Atompub/Collection.pm
+	- introduce make_collection_uri() method to change the
+	  collection URI
+	* lib/Catalyst/Helper/Controller/Atompub/Base.pm
+	- fix get() to utilize $controller->make_collection_uri()
+	- collection information is dynamically generated and not
+	  cached
+	* lib/Catalyst/Helper/Controller/Atompub/Base.pm
+	- service document is not cached and $controller->service() is
+	  removed
+
 2008-04-03  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.4.3:

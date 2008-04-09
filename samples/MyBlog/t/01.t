@@ -137,7 +137,7 @@ $entry = $client->rc;
 is $entry->title, 'Media 1';
 ok $entry->edited;
 ok $entry->updated;
-is $entry->id, 'http://localhost:3000/mediacollection/media_1.atom';
+like $entry->id, qr{tag:localhost:3000,\d{4}-\d\d-\d\d:/mediacollection/media_1.atom};
 
 is $entry->edit_link, 'http://localhost:3000/mediacollection/media_1.atom';
 is my $media_uri = $entry->edit_media_link, 'http://localhost:3000/mediacollection/media_1.gif';

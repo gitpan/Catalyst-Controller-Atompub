@@ -77,9 +77,24 @@ sub instance {
 
 sub get {
     my($self, $c, $class) = @_;
+
     return unless $class = $self->_fullclass($c, $class);
     return unless $self->_is_collection($c, $class);
-    $self->{info}{$class} ||= $self->_make_collection($c, $class);
+
+    my $collection = $self->{info}{$class};
+    unless ($collection) {
+        my $suffix = Catalyst::Utils::class2classsuffix($class);
+        my $config = $c->config->{$suffix}{collection};
+        $collection = XML::Atom::Collection->new;
+        $collection->title($config->{title} || $class =~ /Controller::(.+)/);
+        $collection->accept(@{ $config->{accept} }) if $config->{accept};
+        $collection->add_categories($self->_make_categories($c, $_))
+            for @{ $config->{categories} };
+    }
+
+    $collection->href($class->make_collection_uri($c));
+
+    $collection;
 }
 
 sub _fullclass {
@@ -92,30 +107,6 @@ sub _fullclass {
 sub _is_collection {
     my($self, $c, $class) = @_;
     UNIVERSAL::isa $class, 'Catalyst::Controller::Atompub::Collection';
-}
-
-sub _make_collection {
-    my($self, $c, $class) = @_;
-
-    my $suffix = Catalyst::Utils::class2classsuffix($class);
-
-    my $config = $c->config->{$suffix}{collection};
-
-    my $coll = XML::Atom::Collection->new;
-    $coll->href($self->_make_href($c, $class));
-    $coll->title($config->{title} || $class =~ /Controller::(.+)/);
-    $coll->accept(@{ $config->{accept} }) if $config->{accept};
-
-    $coll->add_categories($self->_make_categories($c, $_))
-        for @{ $config->{categories} };
-
-    $coll;
-}
-
-sub _make_href {
-    my($self, $c, $class) = @_;
-    return unless $class = $self->_fullclass($c, $class);
-    $c->req->base.$class->action_namespace($c);
 }
 
 sub _make_categories {

@@ -80,6 +80,13 @@ use strict;
 use warnings;
 use base qw(Catalyst::Controller::Atompub::Collection);
 
+# Call auto() of superclass if defining auto() in this class
+#use Next;
+#sub auto :Private {
+#    my($self, $c) = @_;
+#    $self->NEXT::auto($c);
+#}
+
 # List resources in a Feed Document
 sub get_feed :Atompub(list) {
     my($self, $c) = @_;

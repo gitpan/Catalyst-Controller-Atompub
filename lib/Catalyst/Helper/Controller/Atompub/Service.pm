@@ -80,13 +80,11 @@ use strict;
 use warnings;
 use base qw(Catalyst::Controller::Atompub::Service);
 
-sub modify_service {
-    my($self, $c, $service) = @_;
-
-    # Edit $service
-
-    return $service;
-}
+# Edit Service Document
+#sub modify_service {
+#    my($self, $c, $service) = @_;
+#    return $service;
+#}
 
 =head1 NAME
 

@@ -4,9 +4,9 @@ use warnings;
 use strict;
 use Carp;
 
-use version; our $VERSION = qv('0.4.3');
+use version; our $VERSION = qv('0.5.0');
 
-use Atompub 0.1.6;
+use Atompub 0.3.0;
 use Catalyst::Request;
 use Catalyst::Response;
 
@@ -86,9 +86,9 @@ The following resources are required:
 
 =item * Catalyst::Model::DBIC::Schema v0.20 or later
 
-=item * Catalyst::View::TT v0.25 or later (C<MyBlog> only)
+=item * Catalyst::View::TT v0.25 or later (C<MyBlog>)
 
-=item * Catalyst Plugins (C<MyBlog> only)
+=item * Catalyst Plugins (C<MyBlog>, C<OurBlogs>)
 
     Authentication
     Authentication::Store::DBIC
@@ -125,6 +125,14 @@ Errors are properly handled.
 
 URI of the Service Document is http://localhost:3000/service .
 This sample also provides a HTML view at http://localhost:3000/html .
+
+
+=head2 samples/OurBlogs
+
+In this sample, collection URIs depend on the user.
+Authentication is required to get Service Documents at http://localhost:3000/service.
+In the Service Document, the collection URI is found and looks like http://localhost:3000/collection/<username>.
+Users are required to be authenticated before posting member resources to their own collection.
 
 
 =head1 AUTHOR

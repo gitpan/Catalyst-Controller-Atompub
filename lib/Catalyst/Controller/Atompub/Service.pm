@@ -8,38 +8,36 @@ use XML::Atom::Service;
 
 use base qw(Catalyst::Controller::Atompub::Base);
 
-__PACKAGE__->mk_accessors(qw(service));
-
 sub default :Private {
     my($self, $c) = @_;
 
-    $self->{service} ||= $self->_make_service($c);
-    $self->{service}   = $self->modify_service($c, $self->service)
-        or return $self->error($c);
+    my $service = $self->_make_service($c);
+    $service = $self->modify_service($c, $service) or return $self->error($c);
 
     $c->res->content_type(media_type('service')) unless $c->res->content_type;
 
-    $c->res->body($self->service->as_xml) unless length $c->res->body;
+    $c->res->body($service->as_xml) unless length $c->res->body;
 }
 
 sub modify_service {
-    my($self, $c, $serv) = @_;
-    return $serv;
+    my($self, $c, $service) = @_;
+    return $service;
 }
 
 sub _make_service {
     my($self, $c) = @_;
 
-    my $serv = XML::Atom::Service->new;
+    my $service = XML::Atom::Service->new;
 
     my $suffix = Catalyst::Utils::class2classsuffix(ref $self);
 
     my @configs = @{ $c->config->{$suffix}{workspace} || [] };
     unless (@configs) {
-        my @colls = grep { $self->info->get($c, $_) } keys %{ $c->components };
+        my @collections
+            = grep { $self->info->get($c, $_) } keys %{ $c->components };
         @configs = ({
             title      => Catalyst::Utils::class2appclass($self),
-            collection => \@colls,
+            collection => \@collections,
         });
     }
 
@@ -49,10 +47,10 @@ sub _make_service {
         $work->add_collection($_) for grep { defined $_ }
                                        map { $self->info->get($c, $_) }
                                           @{ $config->{collection} || [] };
-        $serv->add_workspace($work);
+        $service->add_workspace($work);
     }
 
-    $serv;
+    $service;
 }
 
 1;
@@ -105,13 +103,6 @@ By overriding C<modify_service>, modifies the default Service Documents:
 
         return $service;
     }
-
-
-=head1 ACCESSORS
-
-=head2 $controller->service
-
-An accessor for a Service Document.
 
 
 =head1 INTERNAL INTERFACES
