@@ -1,5 +1,10 @@
 2008-04-10  Takeru INOUE  <takeru.inoue _ gmail.com>
 
+        * release 0.5.1:
+	- re-upload since previous version was failed
+
+2008-04-10  Takeru INOUE  <takeru.inoue _ gmail.com>
+
         * release 0.5.0:
 	* samples/OurBlogs
 	- show how to change collection URIs

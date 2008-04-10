@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use Carp;
 
-use version; our $VERSION = qv('0.5.0');
+use version; our $VERSION = qv('0.5.1');
 
 use Atompub 0.3.0;
 use Catalyst::Request;
