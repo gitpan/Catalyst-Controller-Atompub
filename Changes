@@ -1,3 +1,9 @@
+2008-10-19  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+        * release 0.5.2:
+	* lib/Catalyst/Helper/Controller/Atompub/Collection.pm
+	- apply eval to parse Atom Entry
+
 2008-04-10  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.5.1:
@@ -6,11 +12,13 @@
 2008-04-10  Takeru INOUE  <takeru.inoue _ gmail.com>
 
         * release 0.5.0:
-	* samples/OurBlogs
-	- show how to change collection URIs
+	* Makefile.PL
+	- use Module::Install
 	* lib/Catalyst/Helper/Controller/Atompub/Collection.pm
 	- introduce make_collection_uri() method to change the
 	  collection URI
+	- assign $self->entry_resource before calling
+	  $self->make_entry_uri
 	* lib/Catalyst/Helper/Controller/Atompub/Base.pm
 	- fix get() to utilize $controller->make_collection_uri()
 	- collection information is dynamically generated and not
@@ -18,6 +26,8 @@
 	* lib/Catalyst/Helper/Controller/Atompub/Base.pm
 	- service document is not cached and $controller->service() is
 	  removed
+	* samples/OurBlogs
+	- show how to change collection URIs
 
 2008-04-03  Takeru INOUE  <takeru.inoue _ gmail.com>
 

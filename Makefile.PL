@@ -11,6 +11,7 @@ requires('Catalyst::Plugin::ConfigLoader');
 requires('Catalyst::Runtime', 5.7);
 
 requires('Atompub', 0.003); # 0.3.0
+requires('English');
 requires('File::Slurp');
 requires('FindBin');
 requires('HTTP::Status');
@@ -19,7 +20,7 @@ requires('Text::CSV');
 requires('Time::HiRes');
 requires('URI::Escape');
 
-requires('version');
+requires('version', 0.74);
 
 build_requires('Test::More');
 build_requires('Test::Perl::Critic');

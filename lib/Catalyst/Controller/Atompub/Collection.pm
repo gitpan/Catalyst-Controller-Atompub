@@ -7,6 +7,7 @@ use Atompub::DateTime qw(datetime);
 use Atompub::MediaType qw(media_type);
 use Atompub::Util qw(is_acceptable_media_type is_allowed_category);
 use Catalyst::Utils;
+use English qw(-no_match_vars);
 use File::Slurp;
 use HTTP::Status;
 use NEXT;
@@ -386,8 +387,13 @@ sub _is_modified {
 sub _fixup_entry {
     my($self, $c) = @_;
 
-    my $entry = XML::Atom::Entry->new($c->req->body)
-        or return $self->error($c, RC_BAD_REQUEST, XML::Atom::Entry->errstr);
+    my $entry;
+    eval {
+        $entry = XML::Atom::Entry->new($c->req->body);
+    };
+    if ($EVAL_ERROR) {
+        return $self->error($c, RC_BAD_REQUEST, $EVAL_ERROR);
+    }
 
     return $self->error($c, RC_BAD_REQUEST, 'Forbidden category')
         unless is_allowed_category($self->info->get($c, $self), $entry->category);

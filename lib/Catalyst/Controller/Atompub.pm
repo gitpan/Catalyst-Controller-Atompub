@@ -4,7 +4,7 @@ use warnings;
 use strict;
 use Carp;
 
-use version; our $VERSION = qv('0.5.1');
+use version 0.74; our $VERSION = qv('0.5.2');
 
 use Atompub 0.3.0;
 use Catalyst::Request;
@@ -144,7 +144,7 @@ I would like to thank Masaki NAKAGAWA for his valuable suggestions.
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright (c) 2007, Takeru INOUE C<< <takeru.inoue _ gmail.com> >>. All rights reserved.
+Copyright (c) 2007, Takeru INOUE C<< <takeru.inoue _ gmail.com> >>.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself. See L<perlartistic>.
