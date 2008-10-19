@@ -1,5 +1,11 @@
 2008-10-19  Takeru INOUE  <takeru.inoue _ gmail.com>
 
+        * release 0.5.3:
+	* lib/Catalyst/Helper/Controller/Atompub/Collection.pm
+	- fix a minor bug of 0.5.2
+
+2008-10-19  Takeru INOUE  <takeru.inoue _ gmail.com>
+
         * release 0.5.2:
 	* lib/Catalyst/Helper/Controller/Atompub/Collection.pm
 	- apply eval to parse Atom Entry

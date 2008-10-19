@@ -389,7 +389,8 @@ sub _fixup_entry {
 
     my $entry;
     eval {
-        $entry = XML::Atom::Entry->new($c->req->body);
+        $entry = XML::Atom::Entry->new($c->req->body)
+            or die XML::Atom::Entry->errstr;
     };
     if ($EVAL_ERROR) {
         return $self->error($c, RC_BAD_REQUEST, $EVAL_ERROR);
