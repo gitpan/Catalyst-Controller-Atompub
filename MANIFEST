@@ -1,15 +1,3 @@
-blib/arch/.exists
-blib/arch/auto/Catalyst/Controller/Atompub/.exists
-blib/bin/.exists
-blib/lib/auto/Catalyst/Controller/Atompub/.exists
-blib/lib/Catalyst/Controller/.exists
-blib/lib/Catalyst/Controller/Atompub.pm
-blib/lib/Catalyst/Controller/Atompub/Base.pm
-blib/lib/Catalyst/Controller/Atompub/Collection.pm
-blib/lib/Catalyst/Controller/Atompub/Service.pm
-blib/man1/.exists
-blib/man3/.exists
-blib/script/.exists
 Changes
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm

@@ -1,5 +1,11 @@
 2012-11-01  Takeru INOUE  <takeru.inoue _ gmail.com>
 
+	* release 0.5.6:
+	* MANIFEST
+	- remove blib/
+
+2012-11-01  Takeru INOUE  <takeru.inoue _ gmail.com>
+
 	* release 0.5.5:
 	* lib/Catalyst/Controller/Atompub/Collection.pm
 	- add an extra pair of parens, thanks ANDK
