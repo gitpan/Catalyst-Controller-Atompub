@@ -135,7 +135,7 @@ sub make_edit_uri {
     wantarray ? @uris : $uris[0];
 }
 
-for my $operation (qw(list create read update delete)) {
+for my $operation qw(list create read update delete) {
     no strict 'refs'; ## no critic
     *{"do_$operation"} = sub {
         my($self, $c, @args) = @_;
@@ -155,7 +155,7 @@ sub _list {
     if ($self->{author}) {
         my $author = XML::Atom::Person->new;
         $self->{author}{$_} and $author->$_($self->{author}{$_})
-            for (qw(name email uri));
+            for qw(name email uri);
         $feed->author($author);
     }
 

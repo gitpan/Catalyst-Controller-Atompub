@@ -1,3 +1,15 @@
+blib/arch/.exists
+blib/arch/auto/Catalyst/Controller/Atompub/.exists
+blib/bin/.exists
+blib/lib/auto/Catalyst/Controller/Atompub/.exists
+blib/lib/Catalyst/Controller/.exists
+blib/lib/Catalyst/Controller/Atompub.pm
+blib/lib/Catalyst/Controller/Atompub/Base.pm
+blib/lib/Catalyst/Controller/Atompub/Collection.pm
+blib/lib/Catalyst/Controller/Atompub/Service.pm
+blib/man1/.exists
+blib/man3/.exists
+blib/script/.exists
 Changes
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
@@ -21,9 +33,14 @@ lib/Catalyst/Helper/Controller/Atompub/Collection.pm
 lib/Catalyst/Helper/Controller/Atompub/Service.pm
 Makefile.PL
 MANIFEST			This list of files
+META.yml
 README
 samples/MyAtom/Changes
 samples/MyAtom/init.sql
+samples/MyAtom/lib/Catalyst/Controller/Atompub.pm
+samples/MyAtom/lib/Catalyst/Controller/Atompub/Base.pm
+samples/MyAtom/lib/Catalyst/Controller/Atompub/Collection.pm
+samples/MyAtom/lib/Catalyst/Controller/Atompub/Service.pm
 samples/MyAtom/lib/MyAtom.pm
 samples/MyAtom/lib/MyAtom/Controller/MyCollection.pm
 samples/MyAtom/lib/MyAtom/Controller/MyService.pm
@@ -58,6 +75,10 @@ samples/MyAtom/t/model_DBIC.t
 samples/MyAtom/test.db
 samples/MyBlog/Changes
 samples/MyBlog/init.sql
+samples/MyBlog/lib/Catalyst/Controller/Atompub.pm
+samples/MyBlog/lib/Catalyst/Controller/Atompub/Base.pm
+samples/MyBlog/lib/Catalyst/Controller/Atompub/Collection.pm
+samples/MyBlog/lib/Catalyst/Controller/Atompub/Service.pm
 samples/MyBlog/lib/MyBlog.pm
 samples/MyBlog/lib/MyBlog/Controller/EntryCollection.pm
 samples/MyBlog/lib/MyBlog/Controller/Html.pm
@@ -105,8 +126,6 @@ samples/MyBlog/t/samples/media1.gif
 samples/MyBlog/t/samples/media2.png
 samples/MyBlog/test.db
 samples/OurBlogs/Changes
-samples/OurBlogs/Makefile.PL
-samples/OurBlogs/README
 samples/OurBlogs/init.sql
 samples/OurBlogs/lib/OurBlogs.pm
 samples/OurBlogs/lib/OurBlogs/Controller/Collection.pm
@@ -114,7 +133,9 @@ samples/OurBlogs/lib/OurBlogs/Controller/Root.pm
 samples/OurBlogs/lib/OurBlogs/Controller/Service.pm
 samples/OurBlogs/lib/OurBlogs/Model/DBIC.pm
 samples/OurBlogs/lib/OurBlogs/Model/Schema.pm
+samples/OurBlogs/Makefile.PL
 samples/OurBlogs/ourblogs.yml
+samples/OurBlogs/README
 samples/OurBlogs/root/favicon.ico
 samples/OurBlogs/root/static/images/btn_120x50_built.png
 samples/OurBlogs/root/static/images/btn_120x50_built_shadow.png

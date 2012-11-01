@@ -1,3 +1,9 @@
+2012-11-01  Takeru INOUE  <takeru.inoue _ gmail.com>
+
+	* release 0.5.5:
+	* lib/Catalyst/Controller/Atompub/Collection.pm
+	- add an extra pair of parens, thanks ANDK
+
 2010-05-17  Takeru INOUE  <takeru.inoue _ gmail.com>
 
 	* release 0.5.4:
